@@ -27,9 +27,9 @@ export function Machine() {
         <div className="top">
           <Cables />
           <Monitor machine={machine} />
-          <CarrierBoard />
+          <CarrierBoard machine={machine} />
         </div>
-        <Tray />
+        <Tray machine={machine} />
       </div>
       <FlightLayer />
     </>

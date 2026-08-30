@@ -1,4 +1,5 @@
 import { DOCS, type DriveDoc } from "@/lib/docs-data";
+import type { useCarrierMachine } from "./useCarrierMachine";
 import "./machine.css";
 
 /* Shared drive-face markup — the notch, controller, NAND packages and
@@ -42,7 +43,11 @@ function buildBanks(docs: DriveDoc[]) {
   return banks;
 }
 
-export function Tray() {
+export interface TrayProps {
+  machine: ReturnType<typeof useCarrierMachine>;
+}
+
+export function Tray({ machine }: TrayProps) {
   const banks = buildBanks(DOCS);
   let i = 0;
   return (
@@ -63,7 +68,14 @@ export function Tray() {
                 const idx = i++;
                 return (
                   <div className="pocket" role="listitem" data-label="In use" key={d.id}>
-                    <button className="chip m2" type="button" data-i={idx} aria-current="false" aria-label={`Load ${d.name}`}>
+                    <button
+                      className="chip m2"
+                      type="button"
+                      data-i={idx}
+                      aria-current="false"
+                      aria-label={`Load ${d.name}`}
+                      onClick={() => machine.onChipClick(idx)}
+                    >
                       <DriveFace doc={d} />
                     </button>
                     <span className="spine" aria-hidden="true">

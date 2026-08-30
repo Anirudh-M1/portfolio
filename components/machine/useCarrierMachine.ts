@@ -83,6 +83,8 @@ function slotRect() {
   return { left: l, top: t, width: w, height: h, cx: l + w / 2, cy: t + h / 2 };
 }
 
+const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 function setHash(h: string) {
   try {
     if (history.replaceState) history.replaceState(null, "", h);
@@ -102,6 +104,18 @@ export function useCarrierMachine() {
   // same "reveal only once it's real" behavior the source's own
   // `stage.hidden = false` line has.
   const [ready, setReady] = useState(false);
+  // True for the whole duration of a load — both the outgoing eject and
+  // the incoming insert. Gates PREV/NEXT (next commit) and stops a second
+  // chip click from starting a flight mid-flight.
+  const [busy, setBusy] = useState(false);
+  const loadedIndexRef = useRef<number | null>(null);
+  useEffect(() => {
+    loadedIndexRef.current = loadedIndex;
+  }, [loadedIndex]);
+  const busyRef = useRef(false);
+  useEffect(() => {
+    busyRef.current = busy;
+  }, [busy]);
 
   const timersRef = useRef<number[]>([]);
   const skipPostRef = useRef<(() => void) | null>(null);
@@ -390,6 +404,60 @@ export function useCarrierMachine() {
     [idle, ledOff, makeFlight],
   );
 
+  /* Swap orchestration. When a drive is already seated, the outgoing
+   * eject and the incoming insert overlap deliberately: the outgoing
+   * drive is already heading back to the tray when the next one lifts.
+   * Their board-tilt tracks never collide — eject finishes laying the
+   * board down at 2.57s into its own timeline, insert starts raising it
+   * again at 2.27 + 0.58 = 2.85s into its own — so the 2270ms wait below
+   * is what staggers the two timelines by that same margin. */
+  const load = useCallback(
+    async (i: number) => {
+      if (busyRef.current || i === loadedIndexRef.current) return;
+      setBusy(true);
+      try {
+        skipPostRef.current?.();
+        clearTimers();
+        if (loadedIndexRef.current !== null) {
+          const back = ejectDrive(loadedIndexRef.current);
+          await wait(2270);
+          await Promise.all([back, insert(i)]);
+        } else {
+          await insert(i);
+        }
+      } catch (err) {
+        console.warn("insert failed", err);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [clearTimers, ejectDrive, insert],
+  );
+
+  /* Screen-side stepper (wired to PREV/NEXT in the next commit). Wraps
+   * around, and starts at the first drive when the slot is empty so NEXT
+   * always does something. */
+  const step = useCallback(
+    (dir: 1 | -1) => {
+      if (busyRef.current) return;
+      const n = DOCS.length;
+      const i = loadedIndexRef.current === null ? (dir > 0 ? 0 : n - 1) : (loadedIndexRef.current + dir + n) % n;
+      void load(i);
+    },
+    [load],
+  );
+
+  const onEject = useCallback(async () => {
+    if (busyRef.current || loadedIndexRef.current === null) return;
+    setBusy(true);
+    skipPostRef.current?.();
+    await ejectDrive(loadedIndexRef.current);
+    const hint = document.getElementById("hint");
+    if (hint) hint.textContent = "Select one to load";
+    setBusy(false);
+    setHash(location.pathname);
+  }, [ejectDrive]);
+
   /* Boot-on-mount: mirrors the source's own start() — the initial drive
    * (from the URL hash, or README) is already "in the machine" the
    * instant the stage reveals itself, so the screen is never dark. No
@@ -438,5 +506,21 @@ export function useCarrierMachine() {
     crt.scrollTop = 0;
   }, [screen]);
 
-  return { screen, loadedIndex, ready, crtRef, onCrtClick, idle, land, mountState, ledOff, insert, ejectDrive };
+  return {
+    screen,
+    loadedIndex,
+    busy,
+    ready,
+    crtRef,
+    onCrtClick,
+    onChipClick: load,
+    onEject,
+    idle,
+    land,
+    mountState,
+    ledOff,
+    insert,
+    ejectDrive,
+    step,
+  };
 }

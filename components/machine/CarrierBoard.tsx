@@ -1,12 +1,19 @@
+import type { useCarrierMachine } from "./useCarrierMachine";
 import "./machine.css";
+
+export interface CarrierBoardProps {
+  machine: ReturnType<typeof useCarrierMachine>;
+}
 
 /* The carrier board: one M.2 slot, drawn as an SVG rather than built from
  * CSS boxes like the monitor — this one has real curvature (chamfered
  * corners, rounded pads) an SVG describes far more cheaply than a stack of
- * gradients would. Static for now: the status line still reads "—" and
- * Eject is disabled — useCarrierMachine wires the real drive state and the
- * insert/eject flight animation into this in section E. */
-export function CarrierBoard() {
+ * gradients would. The righead status text and #seated's content are
+ * still set imperatively by useCarrierMachine (mountState()/land()/
+ * ejectDrive(), matching the source's own direct DOM writes) — only
+ * Eject's click handler and disabled state come through as real React
+ * props, the same way Tray wires its chip buttons. */
+export function CarrierBoard({ machine }: CarrierBoardProps) {
   return (
     <div className="rig">
       <div className="righead">
@@ -161,7 +168,12 @@ export function CarrierBoard() {
           <div className="m2 seated" id="seated" hidden aria-hidden="true" />
         </div>
       </div>
-      <button className="eject" id="eject" disabled>
+      <button
+        className="eject"
+        id="eject"
+        disabled={machine.busy || machine.loadedIndex === null}
+        onClick={machine.onEject}
+      >
         Eject
       </button>
     </div>
