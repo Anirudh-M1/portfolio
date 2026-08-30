@@ -378,3 +378,106 @@ a {
 .statusline.live #stLink {
   color: var(--phos-lo);
 }
+
+/* ============================================================
+   the board — one slot
+   ============================================================ */
+/* Tilting to 58deg during an insert projects the board's near edge ~9px
+   wider than its layout box on each side. This gutter absorbs that;
+   without it body{overflow-x:hidden} silently clips the board. */
+.rig {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  justify-content: center;
+  max-height: 100%;
+  padding-inline: 18px;
+}
+.righead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+}
+.righead .t {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.righead .ln {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.righead .st {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+/* max-width plus a max-height on the column keeps the whole board inside
+   the viewport; without the cap it grew with the column and clipped. */
+/* max-width is set by fit() from measured space; this is only a ceiling */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  margin-inline: auto;
+  perspective: 3000px;
+}
+/* The board lies back. The rotation axis is pinned to the vertical centre
+   of the M.2 slot (38.947% + 23.158%/2 = 50.526%), so the slot row sits
+   exactly ON the axis: tilting moves it neither up nor down and scales it
+   not at all. That is what lets a drive in flight aim at the slot with
+   plain arithmetic instead of inverting a 3D matrix. */
+.tilt {
+  position: relative;
+  display: block;
+  transform: rotateX(20deg);
+  transform-origin: 50% 50.526%;
+  box-shadow: 0 34px 48px -18px rgba(0, 0, 0, 0.72);
+}
+.tilt > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.led {
+  transition: fill 0.18s, filter 0.18s;
+}
+.led.lit {
+  fill: #f0503a;
+  filter: drop-shadow(0 0 6px rgba(240, 80, 58, 0.95));
+}
+.led.mounted {
+  fill: #d3a03a;
+  filter: drop-shadow(0 0 5px rgba(211, 160, 58, 0.85));
+}
+.eject {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid rgba(228, 235, 230, 0.2);
+  border-radius: 3px;
+  color: var(--dim);
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: 0.18s;
+}
+.eject:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.eject:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
