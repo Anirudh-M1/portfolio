@@ -93,7 +93,14 @@ function setHash(h: string) {
   }
 }
 
-export function useCarrierMachine() {
+/** Names the onboarding tour's two gesture-gated steps care about: a
+ * drive loaded via a tray chip, versus one loaded via PREV/NEXT. Kept as
+ * a param rather than an import from the tour so this hook has no
+ * dependency on the tour existing at all — Machine can be used (and was,
+ * for several commits) with no tour mounted. */
+export type TourSignalName = "chip" | "nav";
+
+export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
   const crtRef = useRef<HTMLDivElement>(null);
 
   const [screen, setScreen] = useState<ScreenState>({ kind: "idle" });
@@ -673,9 +680,15 @@ export function useCarrierMachine() {
    * again at 2.27 + 0.58 = 2.85s into its own — so the 2270ms wait below
    * is what staggers the two timelines by that same margin. */
   const load = useCallback(
-    async (i: number) => {
+    async (i: number, opts?: { viaNav?: boolean }) => {
       if (busyRef.current || i === loadedIndexRef.current) return;
       setBusy(true);
+      // Reports which real interaction triggered this load — a tray chip,
+      // or PREV/NEXT — to the onboarding tour, if one is mounted. The
+      // tour's gesture-gated steps only advance off this, never off a
+      // timer, so this has to fire from the interaction itself rather
+      // than from some later point where "how it started" is lost.
+      tourSignal?.(opts?.viaNav ? "nav" : "chip");
       try {
         skipPostRef.current?.();
         clearTimers();
@@ -696,18 +709,20 @@ export function useCarrierMachine() {
         setBusy(false);
       }
     },
-    [clearTimers, ejectDrive, insert],
+    [clearTimers, ejectDrive, insert, tourSignal],
   );
 
-  /* Screen-side stepper (wired to PREV/NEXT in the next commit). Wraps
-   * around, and starts at the first drive when the slot is empty so NEXT
-   * always does something. */
+  /* Screen-side stepper, wired to PREV/NEXT. Wraps around, and starts at
+   * the first drive when the slot is empty so NEXT always does
+   * something. Tells load() it came from nav rather than a chip, which is
+   * the only thing that distinguishes the tour's "chip" step from its
+   * "nav" step — both ultimately call the same load(). */
   const step = useCallback(
     (dir: 1 | -1) => {
       if (busyRef.current) return;
       const n = DOCS.length;
       const i = loadedIndexRef.current === null ? (dir > 0 ? 0 : n - 1) : (loadedIndexRef.current + dir + n) % n;
-      void load(i);
+      void load(i, { viaNav: true });
     },
     [load],
   );
