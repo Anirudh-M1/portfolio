@@ -266,6 +266,92 @@ export function useCarrierMachine() {
     drawCablesRef.current();
   }, []);
 
+  /* Cables run from the back of the monitor panel to the board's edge
+   * connector. The board-side anchor can't be measured: .card carries no
+   * transform of its own (the tilt lives on .tilt inside it), so its rect
+   * is identical whether the board is lying flat or standing at 58deg.
+   * Re-reading rects every frame would give a cable that never moves —
+   * the anchor is derived from the tilt angle instead, applying the same
+   * rotation and perspective divide the browser applies to the board, so
+   * the plug stays welded to the edge while it swings.
+   *
+   * PERSP/AXIS/FY are load-bearing across both this file and machine.css:
+   * PERSP must equal .card/.fly's `perspective: 3000px`, and AXIS must
+   * equal .tilt's `transform-origin: 50% 50.526%`. A mismatch between
+   * either pair desyncs the cable from the board's visual tilt — copied
+   * verbatim from the source rather than re-derived. */
+  const PERSP = 3000;
+  const AXIS = 0.50526;
+  const FY = 0.78; // down by the edge connector, where a loom really plugs in
+
+  const geoRef = useRef<{ ax: number; ay: number; cx: number; cy: number; cw: number; ch: number } | null>(null);
+  // Populated by the levitation spring in a later commit; {0,0} until then
+  // means the cable anchors purely off measured layout, same as at rest.
+  const floatRef = useRef({ ox: 0, oy: 0 });
+
+  const cacheGeo = useCallback(() => {
+    const topEl = document.querySelector<HTMLElement>(".top");
+    const mon = document.querySelector<HTMLElement>(".mon");
+    const card = document.querySelector<HTMLElement>(".card");
+    if (!topEl || !mon || !card) return;
+    const tb = topEl.getBoundingClientRect();
+    const mb = mon.getBoundingClientRect();
+    const cb = card.getBoundingClientRect();
+    if (!tb.width || !mb.width || !cb.width) {
+      geoRef.current = null;
+      return;
+    }
+    geoRef.current = {
+      ax: mb.right - tb.left - mb.width * 0.05,
+      ay: mb.top - tb.top + mb.height * 0.68,
+      cx: cb.left - tb.left,
+      cy: cb.top - tb.top,
+      cw: cb.width,
+      ch: cb.height,
+    };
+  }, []);
+
+  /* The board's left edge at height FY, after rotateX(tiltNow) + perspective. */
+  const boardAnchor = useCallback(() => {
+    const g = geoRef.current!;
+    const th = (tiltNowRef.current * Math.PI) / 180;
+    const dy = (FY - AXIS) * g.ch;
+    const z = dy * Math.sin(th); // below the axis swings forward
+    const sc = PERSP / (PERSP - z);
+    return {
+      x: g.cx + g.cw / 2 - (g.cw / 2) * sc,
+      y: g.cy + AXIS * g.ch + dy * Math.cos(th) * sc,
+    };
+  }, []);
+
+  const drawCables = useCallback(() => {
+    if (!geoRef.current) cacheGeo();
+    if (!geoRef.current) return;
+    const ax = geoRef.current.ax + floatRef.current.ox,
+      ay = geoRef.current.ay + floatRef.current.oy;
+    const b = boardAnchor();
+    const run = b.x - ax;
+
+    for (let k = 0; k < 3; k++) {
+      const sag = 34 + k * 20,
+        off = (k - 1) * 7;
+      const d =
+        `M${ax} ${ay + off} C${ax + run * 0.34} ${ay + sag + off} ` +
+        `${ax + run * 0.66} ${b.y + sag + off} ${b.x} ${b.y + off}`;
+      document.getElementById("c" + k)?.setAttribute("d", d);
+      document.getElementById("k" + k)?.setAttribute("d", d);
+      document.getElementById("s" + k)?.setAttribute("d", d);
+    }
+    // Connectors are groups; the whole assembly (boot, housing, shell,
+    // screws) travels together via one transform.
+    document.getElementById("pA")?.setAttribute("transform", `translate(${ax} ${ay})`);
+    document.getElementById("pB")?.setAttribute("transform", `translate(${b.x} ${b.y})`);
+  }, [boardAnchor, cacheGeo]);
+
+  useEffect(() => {
+    drawCablesRef.current = drawCables;
+  }, [drawCables]);
+
   /* A drive in flight. Its box is parked on the slot and everything is
    * expressed as a transform away from there, so "arrived" is transform
    * identity — exactly the pose the seated drive already has. */
@@ -491,10 +577,15 @@ export function useCarrierMachine() {
     };
     rail?.addEventListener("wheel", onWheel, { passive: false });
 
+    cacheGeo();
+    drawCables();
+    addEventListener("scroll", drawCables, { passive: true });
+
     return () => {
       clearTimers();
       if (ledTimerRef.current !== null) clearTimeout(ledTimerRef.current);
       rail?.removeEventListener("wheel", onWheel);
+      removeEventListener("scroll", drawCables);
     };
     // Runs once on mount; mountState/land/clearTimers are stable via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
