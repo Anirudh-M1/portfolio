@@ -80,4 +80,36 @@ export const DOCS: DriveDoc[] = [
       { label: "Email", href: "mailto:moholkar.anirudh@gmail.com" },
     ],
   },
+  {
+    kind: "project",
+    bank: "01 · INTERNSHIP",
+    id: "bom",
+    name: "BOM Agent",
+    tag: "PYTHON · RAG",
+    part: "ANR-BM-2280",
+    cap: "1 TB",
+    mount: "/bom-agent",
+    kick: "Agentic RAG over enterprise data · Zebra Technologies",
+    heading: "BOM Agent",
+    tags: ["Python", "RAG", "LangChain", "BigQuery", "Databricks", "Evals"],
+    fields: [
+      {
+        term: "Problem",
+        body: "When a component supplier goes dark, analysts have to hand cross-reference bill-of-materials blueprints to find alternate parts and transition schemes. It is slow, and it is exactly the moment you cannot afford slow — downstream fulfillment for <b>Amazon</b>, <b>Target</b> and <b>Walmart</b> depends on the answer.",
+      },
+      {
+        term: "Approach",
+        body: "Architected and deployed a conversational RAG agent inside the Zebra Data Lake, indexing proprietary BOM blueprints through <b>BigQuery</b> and <b>Databricks</b> so analysts can ask for alternate suppliers in natural language instead of reading spreadsheets.",
+      },
+      {
+        term: "Evaluation",
+        body: "Built a prompt evaluation harness with <b>150+</b> test cases and ran the agent against it every change. Accuracy moved from <b>71%</b> to <b>94%</b> and hallucinations dropped <b>60%</b>. The harness mattered more than any single prompt — without it, \"better\" was just a feeling.",
+      },
+      {
+        term: "Result",
+        body: "Deployed to production. Manual cross-referencing during supplier blackouts is gone.",
+      },
+    ],
+    links: [],
+  },
 ];
