@@ -285,9 +285,9 @@ export function useCarrierMachine() {
   const FY = 0.78; // down by the edge connector, where a loom really plugs in
 
   const geoRef = useRef<{ ax: number; ay: number; cx: number; cy: number; cw: number; ch: number } | null>(null);
-  // Populated by the levitation spring in a later commit; {0,0} until then
-  // means the cable anchors purely off measured layout, same as at rest.
-  const floatRef = useRef({ ox: 0, oy: 0 });
+  // ox/oy are what drawCables reads; x/y/vx/vy/idle drive the spring
+  // itself. Kept as one ref (not state) since it's written every rAF tick.
+  const floatRef = useRef({ x: 0, y: 0, vx: 0, vy: 0, idle: 0, ox: 0, oy: 0 });
 
   const cacheGeo = useCallback(() => {
     const topEl = document.querySelector<HTMLElement>(".top");
@@ -351,6 +351,114 @@ export function useCarrierMachine() {
   useEffect(() => {
     drawCablesRef.current = drawCables;
   }, [drawCables]);
+
+  /* ---------- levitation ----------
+   * Nothing holds the monitor up, so it behaves like a mass on a spring.
+   * Scrolling shoves it the opposite way — the panel has inertia, so when
+   * the world moves it lags, overshoots, and settles. The same offset
+   * feeds drawCables() so the loom stays plugged in while it moves.
+   *
+   * x'' = -k*x - c*x' — critically-ish damped, tuned to settle in about a
+   * second rather than wobble like jelly. Rotation is derived from
+   * position and velocity, not simulated separately: a suspended object
+   * pitches as it swings, and deriving it keeps the two in sync for free.
+   */
+  const SPRING = 0.026,
+    DAMP = 0.108,
+    KICK = 0.3,
+    MAXV = 30;
+  const maxDRef = useRef(42);
+  const lastScrollYRef = useRef(0);
+  const floatRafRef = useRef<number | null>(null);
+
+  /* Travel is capped by whatever gap actually exists between the bar and
+   * the tray at this viewport, so the panel can never swing into either
+   * no matter how the layout resolves. Measured at rest by subtracting
+   * the offset that is currently applied. */
+  const measureFloatRange = useCallback(() => {
+    const bar = document.querySelector<HTMLElement>(".bar");
+    const tray = document.querySelector<HTMLElement>(".tray");
+    const mon = document.querySelector<HTMLElement>(".mon");
+    if (!bar || !tray || !mon) return;
+    const m = mon.getBoundingClientRect();
+    const head = m.top - floatRef.current.oy - bar.getBoundingClientRect().bottom;
+    const leg = tray.getBoundingClientRect().top - (m.bottom - floatRef.current.oy);
+    const room = Math.min(head, leg) - 10;
+    maxDRef.current = Math.max(8, Math.min(42, room));
+  }, []);
+
+  const nudge = useCallback((dy: number, dx: number) => {
+    const f = floatRef.current;
+    // pushed the other way: the panel resists the direction you scrolled
+    f.vy -= Math.max(-70, Math.min(70, dy)) * KICK * 0.19;
+    f.vx -= Math.max(-70, Math.min(70, dx || 0)) * KICK * 0.04;
+  }, []);
+
+  const floatStep = useCallback(() => {
+    const f = floatRef.current;
+    f.idle += 0.0034;
+
+    // Driven only by scroll that actually happened — reading the wheel
+    // event directly would keep pushing the panel when the page cannot
+    // move (at the top of the document, scrolling up fires wheel events
+    // forever while scrollY stays 0), so the monitor would drift with
+    // nothing moving behind it. scrollY delta is zero at both limits,
+    // which is the behavior we want, and it still picks up scrollbar
+    // drags, keyboard paging and touch.
+    const sy = scrollY,
+      ds = sy - lastScrollYRef.current;
+    lastScrollYRef.current = sy;
+    if (Math.abs(ds) > 0.5) nudge(ds, 0);
+
+    f.vy += -SPRING * f.y - DAMP * f.vy;
+    f.vx += -SPRING * f.x - DAMP * f.vx;
+    f.vy = Math.max(-MAXV, Math.min(MAXV, f.vy));
+    f.vx = Math.max(-MAXV, Math.min(MAXV, f.vx));
+    f.y += f.vy;
+    f.x += f.vx;
+    // hard travel limit — it must never reach the tray below or the bar above
+    const MAXD = maxDRef.current;
+    if (f.y > MAXD) {
+      f.y = MAXD;
+      f.vy *= -0.35;
+    }
+    if (f.y < -MAXD) {
+      f.y = -MAXD;
+      f.vy *= -0.35;
+    }
+    if (f.x > MAXD) {
+      f.x = MAXD;
+      f.vx *= -0.35;
+    }
+    if (f.x < -MAXD) {
+      f.x = -MAXD;
+      f.vx *= -0.35;
+    }
+
+    // a slow drift so it still reads as suspended when nothing is happening
+    const by = Math.sin(f.idle) * 2.6,
+      bx = Math.cos(f.idle * 0.72) * 1.5;
+    const ox = f.x + bx,
+      oy = f.y + by;
+    f.ox = ox;
+    f.oy = oy;
+
+    // pitch with vertical travel, yaw with horizontal — a hanging object
+    // leads with its bottom edge as it swings
+    const rx = 2.5 - oy * 0.016 - f.vy * 0.05;
+    const ry = 9 + ox * 0.012 + f.vx * 0.04;
+
+    const mon = document.querySelector<HTMLElement>(".mon");
+    if (mon) {
+      mon.style.transform =
+        `translate3d(${ox.toFixed(2)}px,${oy.toFixed(2)}px,0) ` +
+        `perspective(2600px) rotateX(${rx.toFixed(3)}deg) rotateY(${ry.toFixed(3)}deg)`;
+    }
+
+    drawCables();
+
+    floatRafRef.current = requestAnimationFrame(floatStep);
+  }, [drawCables, nudge]);
 
   /* A drive in flight. Its box is parked on the slot and everything is
    * expressed as a transform away from there, so "arrived" is transform
@@ -578,14 +686,19 @@ export function useCarrierMachine() {
     rail?.addEventListener("wheel", onWheel, { passive: false });
 
     cacheGeo();
+    measureFloatRange();
     drawCables();
     addEventListener("scroll", drawCables, { passive: true });
+
+    lastScrollYRef.current = scrollY;
+    floatRafRef.current = requestAnimationFrame(floatStep);
 
     return () => {
       clearTimers();
       if (ledTimerRef.current !== null) clearTimeout(ledTimerRef.current);
       rail?.removeEventListener("wheel", onWheel);
       removeEventListener("scroll", drawCables);
+      if (floatRafRef.current !== null) cancelAnimationFrame(floatRafRef.current);
     };
     // Runs once on mount; mountState/land/clearTimers are stable via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
