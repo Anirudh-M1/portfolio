@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DOCS, type DriveDoc } from "@/lib/docs-data";
+import { E, timeline } from "@/lib/carrier-motion";
 
 /* useCarrierMachine is the React home for the source prototype's big IIFE.
  * Most of it stays exactly as imperative as the source — direct
  * getElementById DOM writes driven from refs/effects rather than React
  * state — because the static markup built in section D already carries
- * every id and class the original script queried for For instance
+ * every id and class the original script queried for, e.g.
  * `.chip`/`.pocket` inside #rail, `#led`, `#seated`, `#stage`. Porting
  * against those same selectors is the lowest-risk path: the behavior is
  * identical to the source, not just similar.
@@ -53,6 +54,33 @@ function fromHash(): number {
   if (typeof location === "undefined") return 0;
   const i = DOCS.findIndex((d) => d.id === location.hash.slice(1));
   return i < 0 ? 0 : i;
+}
+
+/* The slot's box as a fraction of the card's UNTILTED layout box. Same
+ * numbers .seated uses in CSS (17.692%/38.947%/61.538%/23.158%), so the
+ * flight target and the drive that ends up sitting there can never drift
+ * apart. */
+const SLOT = { l: 0.17692, t: 0.38947, w: 0.61538, h: 0.23158 };
+
+const REST = 20; // board at rest — matches --tilt in machine.css
+const WORK = 58; // board tilted up to receive a drive
+const LIFT = 28; // hinge angle a real M.2 goes in at
+const PULL = 96; // board units the mount sits back by
+
+/* The slot rect, derived rather than measured. .card carries no transform
+ * of its own — the tilt lives on .tilt inside it — so its rect is the
+ * honest untilted layout box, and because the rotation axis runs through
+ * the slot's own centre (see .tilt's transform-origin in machine.css),
+ * that centre is fixed under the tilt. This is the true flight target,
+ * not an approximation of a projected one. */
+function slotRect() {
+  const card = document.querySelector<HTMLElement>(".card");
+  const c = card!.getBoundingClientRect();
+  const w = SLOT.w * c.width,
+    h = SLOT.h * c.height;
+  const l = c.left + SLOT.l * c.width,
+    t = c.top + SLOT.t * c.height;
+  return { left: l, top: t, width: w, height: h, cx: l + w / 2, cy: t + h / 2 };
 }
 
 function setHash(h: string) {
@@ -183,8 +211,7 @@ export function useCarrierMachine() {
   }, []);
 
   /* The drive lives in the slot from the moment the link trains, not when
-   * the board finishes laying back down (once there's a board to lay
-   * down — the insert() timeline lands in the next commit). */
+   * the board finishes laying back down. */
   const land = useCallback((i: number) => {
     const seated = document.getElementById("seated");
     if (!seated) return;
@@ -210,6 +237,106 @@ export function useCarrierMachine() {
       setHash("#" + DOCS[i].id);
     },
     [boot, ledOn, setStatusline],
+  );
+
+  /* Board tilt drives at 60fps during a flight, so it's a plain mutable
+   * ref rather than React state — re-rendering the whole tree every frame
+   * for a single transform would be the exact overhead FlightLayer's
+   * imperative approach already avoids. drawCables() (a later commit)
+   * hooks in here too, since the loom has to swing with the board. */
+  const tiltNowRef = useRef(REST);
+  const drawCablesRef = useRef<() => void>(() => {});
+  const paintTilt = useCallback(() => {
+    const tilt = document.querySelector<HTMLElement>(".tilt");
+    if (tilt) tilt.style.transform = `rotateX(${tiltNowRef.current}deg)`;
+    drawCablesRef.current();
+  }, []);
+
+  /* A drive in flight. Its box is parked on the slot and everything is
+   * expressed as a transform away from there, so "arrived" is transform
+   * identity — exactly the pose the seated drive already has. */
+  const makeFlight = useCallback((d: DriveDoc, chipRect: DOMRect) => {
+    const card = document.querySelector<HTMLElement>(".card")!.getBoundingClientRect();
+    const slot = slotRect();
+    const fly = document.getElementById("fly");
+    const el = document.createElement("div");
+    el.className = "flyx";
+    el.style.cssText = `left:${slot.left}px;top:${slot.top}px;width:${slot.width}px;height:${slot.height}px`;
+    el.innerHTML = `<div class="flyy"><div class="flyh"><div class="m2">${gutsHTML(d, true)}</div></div></div>`;
+    fly?.appendChild(el);
+
+    const yEl = el.firstElementChild as HTMLElement;
+    const hEl = yEl.firstElementChild as HTMLElement;
+    const screw = hEl.querySelector<HTMLElement>(".screw")!;
+    // If .card hasn't been laid out yet, slot.width is 0 and this division
+    // is NaN — which the CSS parser silently voids, making the drive
+    // vanish with no transform at all. Guard the denominator explicitly.
+    const geo = {
+      dx: chipRect.left + chipRect.width / 2 - slot.cx,
+      dy: chipRect.top + chipRect.height / 2 - slot.cy,
+      s: slot.width > 0 ? chipRect.width / slot.width : 1,
+      pull: (PULL / 520) * card.width,
+    };
+    const st = { u: 1, hinge: 0, pull: 1, screw: 0 };
+    const ok = (n: number) => (Number.isFinite(n) ? n : 0);
+
+    function paint() {
+      const u = st.u;
+      const tx = ok((1 - u) * -geo.pull * st.pull + u * geo.dx);
+      const ty = ok(u * geo.dy);
+      const sc = ok(1 + (geo.s - 1) * u) || 1;
+      el.style.transform = `rotateX(${ok(tiltNowRef.current * (1 - u))}deg)`;
+      yEl.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`;
+      hEl.style.transform = `rotateY(${ok(st.hinge)}deg)`;
+      screw.style.opacity = String(st.screw);
+      paintTilt();
+    }
+    return { st, paint, remove: () => el.remove() };
+  }, [paintTilt]);
+
+  const insert = useCallback(
+    (i: number) => {
+      const d = DOCS[i];
+      const rail = document.getElementById("rail");
+      const pockets = rail ? [...rail.querySelectorAll<HTMLElement>(".pocket")] : [];
+      const chips = rail ? [...rail.querySelectorAll<HTMLElement>(".chip")] : [];
+      pockets[i]?.classList.add("out");
+
+      const F = makeFlight(d, chips[i]!.getBoundingClientRect());
+      const s = F.st;
+      F.paint();
+
+      return new Promise<void>((done) => {
+        timeline(
+          [
+            // the drive leaves the tray and crosses to the board
+            { at: 0, dur: 0.9, ease: E.p3io, from: 1, to: 0, set: (v) => (s.u = v) },
+            // the board lies back to meet it
+            { at: 0.58, dur: 0.74, ease: E.p3io, from: REST, to: WORK, set: (v) => (tiltNowRef.current = v) },
+            // the drive cocks up to its insertion angle while it is still
+            // short of the socket, and finishes before the pads start to enter
+            { at: 0.34, dur: 0.62, ease: E.p3io, from: 0, to: LIFT, set: (v) => (s.hinge = v) },
+            // pads slide home along the drive's own axis
+            { at: 1.2, dur: 0.62, ease: E.p2io, from: 1, to: 0, set: (v) => (s.pull = v) },
+            { at: 1.82, dur: 0, from: 0, to: 1, set: () => mountState(i) },
+            // and it presses flat, the way a real M.2 does
+            { at: 1.82, dur: 0.5, ease: E.p2io, from: LIFT, to: 0, set: (v) => (s.hinge = v) },
+            { at: 2.14, dur: 0.34, ease: E.p2out, from: 0, to: 1, set: (v) => (s.screw = v) },
+            // board lays back down at the same pace it tilted up
+            { at: 2.43, dur: 0.7, ease: E.p3io, from: WORK, to: REST, set: (v) => (tiltNowRef.current = v) },
+          ],
+          F.paint,
+          done,
+        );
+      }).then(() => {
+        // every transform is identity and the board is back at rest, so
+        // the flier and the seated drive are the same pixels — the swap
+        // is invisible
+        land(i);
+        F.remove();
+      });
+    },
+    [land, makeFlight, mountState],
   );
 
   /* Boot-on-mount: mirrors the source's own start() — the initial drive
@@ -260,5 +387,5 @@ export function useCarrierMachine() {
     crt.scrollTop = 0;
   }, [screen]);
 
-  return { screen, loadedIndex, ready, crtRef, onCrtClick, idle, land, mountState, ledOff };
+  return { screen, loadedIndex, ready, crtRef, onCrtClick, idle, land, mountState, ledOff, insert };
 }
