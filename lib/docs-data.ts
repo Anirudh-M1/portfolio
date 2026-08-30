@@ -146,6 +146,38 @@ export const EDUCATION: EducationData = {
   ],
 };
 
+export interface SkillsRow {
+  label: string;
+  body: string;
+}
+
+export interface SkillsData {
+  eyebrow: string;
+  rows: SkillsRow[];
+}
+
+export const SKILLS: SkillsData = {
+  eyebrow: "Technical Skills",
+  rows: [
+    {
+      label: "AI & Agentic",
+      body: "Agentic workflows (ReAct / Reflection), LangChain, RAG architecture, vector databases (Pinecone, Milvus), prompt evaluation, LLM observability.",
+    },
+    {
+      label: "Distributed & Infra",
+      body: "Fault-tolerant architecture, microservices, consensus protocols (Raft, Paxos), Docker, Kubernetes, AWS (EC2, Lambda, Bedrock), CI/CD pipelines.",
+    },
+    {
+      label: "Low-Level",
+      body: "Linux kernel development, multithreading and concurrency, memory management, SystemVerilog, RISC-V and SLC-3 architecture, socket programming.",
+    },
+    {
+      label: "Languages & Tools",
+      body: "Python, C, C++, Java, JavaScript, SQL, Go, Git, gRPC, REST APIs, Jira.",
+    },
+  ],
+};
+
 /** Drives in tray order — this is also load order for keyboard/PREV-NEXT
  * navigation and the order banks are built in. */
 export const DOCS: DriveDoc[] = [
