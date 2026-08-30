@@ -445,4 +445,36 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [{ label: "Repository", href: "https://github.com/Anirudh-M1/Full-Stack-Data-Design-Workshop" }],
   },
+  {
+    kind: "project",
+    bank: "04 · BUILT & LED",
+    id: "chicagoland",
+    name: "Help Forum",
+    tag: "REACT · FOUNDER",
+    part: "ANR-CH-2280",
+    cap: "256 GB",
+    mount: "/chicagoland",
+    kick: "Founder · Chicagoland Help Forum",
+    heading: "Help Forum",
+    tags: ["React", "Node.js", "GitHub Actions", "CI/CD"],
+    fields: [
+      {
+        term: "Origin",
+        body: "Founded during the pandemic to connect under-served students in the Chicago area with people who could help them.",
+      },
+      {
+        term: "Impact",
+        body: "Scaled to <b>300+</b> users and raised <b>$5,400+</b> with <b>100%</b> donor transparency, sustained over <b>3</b> years while enrolled full-time.",
+      },
+      {
+        term: "Engineering",
+        body: "A responsive full-stack React and Node.js platform that served <b>13,000+</b> page views in 2024, with continuous feature releases shipped through a <b>GitHub Actions</b> CI/CD pipeline.",
+      },
+      {
+        term: "Why it is here",
+        body: "It is the longest-running thing I have built, and the only one where I was accountable for the money.",
+      },
+    ],
+    links: [],
+  },
 ];
