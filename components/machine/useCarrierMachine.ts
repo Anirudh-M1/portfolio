@@ -681,7 +681,11 @@ export function useCarrierMachine() {
         clearTimers();
         if (loadedIndexRef.current !== null) {
           const back = ejectDrive(loadedIndexRef.current);
-          await wait(2270);
+          // The 2270ms stagger only means something when there's an
+          // actual flight to stagger against — under reduced motion,
+          // eject/insert both resolve instantly, so waiting first just
+          // holds the empty "NO DEVICE" state on screen for no reason.
+          if (!reduced) await wait(2270);
           await Promise.all([back, insert(i)]);
         } else {
           await insert(i);
