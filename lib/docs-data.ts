@@ -287,4 +287,42 @@ export const DOCS: DriveDoc[] = [
     // other ECE 428 MPs (file not supplied yet).
     links: [],
   },
+  {
+    kind: "project",
+    bank: "02 · DISTRIBUTED",
+    id: "hydfs",
+    name: "HyDFS",
+    tag: "GO · DISTRIBUTED FS",
+    part: "ANR-HY-2280",
+    cap: "512 GB",
+    mount: "/hydfs",
+    kick: "Fault-tolerant file system · ECE 428",
+    heading: "HyDFS",
+    tags: ["Go", "RPC", "HTTP", "Replication", "Eventual consistency"],
+    fields: [
+      {
+        term: "Problem",
+        body: "Keep files available and eventually consistent across a cluster where nodes crash and rejoin without warning.",
+      },
+      {
+        term: "Approach",
+        body: "A hybrid architecture that separates control flow from data flow — metadata moves over RPC, bulk transfers over HTTP — so metadata operations are not stuck behind large file writes. Files are stored as independent blocks, one per append, which is what makes concurrent writers cheap. Failure detection is not reimplemented here: it runs on the gossip membership layer from MP2.",
+      },
+      {
+        term: "Consistency",
+        body: "Eventual consistency at a replication factor of log(N) ≈ 3, with a background merge every 3 seconds reconciling blocks after a partition and re-replicating automatically on rejoin.",
+      },
+      {
+        term: "Result",
+        body: "Re-replication completes in ~3.6–3.9s and stays flat from 200 KB to 1 MB files — the cost is detection and merge interval, not transfer.",
+      },
+      {
+        term: "What I would change",
+        body: "Merge time is flat at ~0.17s no matter how many concurrent appends run, because appends already write to every replica synchronously. Merge downloads nothing in the common case, so it is insurance against partitions rather than part of the write path. Useful to know, but it means the design pays for a reconciliation pass it rarely needs.",
+      },
+    ],
+    // Source links to /MP3-HyDFS.pdf — omitted, same reason as the other
+    // ECE 428 MPs (file not supplied yet).
+    links: [],
+  },
 ];
