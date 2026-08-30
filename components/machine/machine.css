@@ -379,6 +379,65 @@ a {
   color: var(--phos-lo);
 }
 
+/* ---------- cables ---------- */
+/* Drawn in .top's own coordinate space and re-pathed by drawCables(), so
+   they stay plugged in at both ends whenever the layout moves. */
+.cables {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+/* A cable is a cylinder, so it needs three passes: a dark jacket, a lighter
+   body, and a thin highlight riding its upper edge. One flat stroke reads
+   as a drawn line; the highlight is what makes it read as round. */
+.cables .sheath {
+  fill: none;
+  stroke: #05100d;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.cables .core {
+  fill: none;
+  stroke: #182a25;
+  stroke-width: 4.6;
+  stroke-linecap: round;
+}
+.cables .shine {
+  fill: none;
+  stroke: rgba(255, 242, 224, 0.11);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  transform: translateY(-1.6px);
+}
+.cables .conn .boot {
+  fill: #0c1613;
+  stroke: rgba(232, 238, 236, 0.1);
+  stroke-width: 0.8;
+}
+.cables .conn .body {
+  fill: url(#connFill);
+  stroke: rgba(232, 238, 236, 0.2);
+  stroke-width: 0.9;
+}
+.cables .conn .shell {
+  fill: #3a4441;
+  stroke: rgba(232, 238, 236, 0.3);
+  stroke-width: 0.8;
+}
+.cables .conn .screw {
+  r: 1.5;
+  fill: #0a100e;
+  stroke: rgba(232, 238, 236, 0.28);
+  stroke-width: 0.7;
+}
+.cables .conn .lip {
+  fill: rgba(255, 242, 224, 0.13);
+}
+
 /* ============================================================
    the board — one slot
    ============================================================ */
