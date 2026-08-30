@@ -742,6 +742,13 @@ export function useCarrierMachine() {
     lastScrollYRef.current = scrollY;
     floatRafRef.current = requestAnimationFrame(floatStep);
 
+    // Deep links stay live after boot: editing the URL hash, or using
+    // back/forward through history the machine itself pushed via
+    // setHash(), loads the matching drive rather than only working on
+    // the very first paint.
+    const onHashChange = () => void load(fromHash());
+    addEventListener("hashchange", onHashChange);
+
     return () => {
       clearTimers();
       if (ledTimerRef.current !== null) clearTimeout(ledTimerRef.current);
@@ -749,6 +756,7 @@ export function useCarrierMachine() {
       removeEventListener("scroll", drawCables);
       if (floatRafRef.current !== null) cancelAnimationFrame(floatRafRef.current);
       ro?.disconnect();
+      removeEventListener("hashchange", onHashChange);
     };
     // Runs once on mount; mountState/land/clearTimers are stable via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
