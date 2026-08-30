@@ -211,4 +211,42 @@ export const DOCS: DriveDoc[] = [
     // rather than ship a dead one — add it back once the file exists.
     links: [],
   },
+  {
+    kind: "project",
+    bank: "02 · DISTRIBUTED",
+    id: "membership",
+    name: "Membership",
+    tag: "GO · SWIM",
+    part: "ANR-MB-2280",
+    cap: "256 GB",
+    mount: "/membership",
+    kick: "Group membership · ECE 428 · MP2",
+    heading: "Membership",
+    tags: ["Go", "Gossip", "SWIM", "UDP"],
+    fields: [
+      {
+        term: "Problem",
+        body: "Every node needs an accurate view of who is alive, over lossy UDP, without the traffic growing out of control as the cluster does.",
+      },
+      {
+        term: "Approach",
+        body: "Built both protocols and measured them against each other. Gossip carries the full membership list in every heartbeat. Ping-ack sends a direct ping, falls back to indirect pings routed through peers, and carries only the five most recent events. Both run with and without a suspicion layer, where a node goes SUSPICIOUS before FAILED and can refute the claim by incrementing its incarnation number.",
+      },
+      {
+        term: "Tuning",
+        body: "Parameters were derived rather than guessed: a 3s detection and 6s cluster-wide dissemination requirement gives a protocol period of 0.1s, putting a full round trip through ten nodes at 1.9s.",
+      },
+      {
+        term: "Result",
+        body: "Gossip bandwidth climbs with cluster size because the payload is the membership list; ping-ack stays nearly flat, capped at five events per message. Gossip gains most from suspicion since it has no other defence against a dropped heartbeat — ping-ack's indirect probes already provide that, so without suspicion ping-ack detects faster and false-positives less.",
+      },
+      {
+        term: "Why it is here",
+        body: "Both HyDFS and RainStorm run their failure detection on this layer rather than reimplementing it.",
+      },
+    ],
+    // Source links to /MP2-Group-Membership.pdf — omitted, same reason as
+    // Log Querier (file not supplied yet).
+    links: [],
+  },
 ];
