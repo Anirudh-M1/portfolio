@@ -1,0 +1,130 @@
+/* ---------- no-JS / small screens ----------
+   Plain-theme rendering for the .docs fallback: the same DriveDoc content
+   DocBody renders, styled for a normal document rather than a phosphor
+   screen. Shown whenever the interactive stage is hidden — see the
+   body.js media-query rule added once the stage exists (section D/H) —
+   and always shown for a no-JS visitor, since body never gets the `js`
+   class to begin with. Ported verbatim from the source prototype. */
+.docs {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: clamp(48px, 9vh, 88px) clamp(20px, 6vw, 40px) 0;
+}
+.docs article {
+  padding: 38px 0;
+  border-top: 1px solid var(--line);
+}
+.docs article:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.docs h1 {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 7vw, 3.1rem);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+.docs h1 .sub {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.26em;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+  margin-top: 14px;
+}
+.docs h2 {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.2rem, 4.6vw, 1.7rem);
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+}
+.docs .kick {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.docs .rule {
+  height: 1px;
+  background: var(--line);
+  margin: 16px 0;
+}
+.docs p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--dim);
+  max-width: 64ch;
+  margin-bottom: 12px;
+}
+.docs .lede {
+  color: var(--silk);
+}
+.docs dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 9px 20px;
+  margin: 4px 0 14px;
+  font-size: 13px;
+  line-height: 1.78;
+}
+.docs dt {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding-top: 5px;
+  white-space: nowrap;
+}
+.docs dd {
+  color: var(--dim);
+  max-width: 58ch;
+}
+.docs .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 4px;
+}
+.docs .tags span {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 4px 8px;
+  color: var(--dim);
+}
+.docs .links {
+  display: flex;
+  gap: 17px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+.docs a {
+  color: var(--silk);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(211, 160, 58, 0.5);
+}
+/* The portrait belongs to the CRT screen. .docs is the fallback shown
+   when the stage is hidden — where the CRT-scoped styles that size and
+   tone it do not apply, so it would land as a raw unstyled square. It is
+   decorative, so it simply does not appear here. */
+.docs .por {
+  display: none;
+}
+@media (max-width: 560px) {
+  .docs dl {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .docs dt {
+    padding-top: 10px;
+  }
+}
