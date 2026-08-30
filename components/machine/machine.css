@@ -813,3 +813,95 @@ a {
 .chip[aria-current="true"] {
   box-shadow: 0 0 0 1px rgba(211, 160, 58, 0.6), 0 12px 22px -10px rgba(0, 0, 0, 0.9);
 }
+
+/* ============================================================
+   the drive — one rule set for tray chip, flier and seated
+   ============================================================ */
+/* Structural box only. Sizing that scales with the chip's own width
+   (the notch, the screw, the label's type) is held back for its own
+   commit next — this is where the design leans on container queries,
+   which get smoke-tested there rather than assumed to work here. */
+.m2 {
+  position: relative;
+  background: linear-gradient(158deg, var(--drive-hi), var(--drive) 42%, var(--drive-lo));
+  border-radius: 2px 1px 1px 2px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  border: 0;
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.13), 0 12px 22px -10px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(228, 235, 230, 0.07) inset;
+}
+.m2 .pads {
+  position: absolute;
+  right: 0;
+  top: 16%;
+  bottom: 16%;
+  width: 5%;
+  background: repeating-linear-gradient(180deg, var(--gold) 0 4px, transparent 4px 8px);
+  opacity: 0.85;
+}
+.m2 .key {
+  position: absolute;
+  right: 0;
+  top: calc(50% + 2px);
+  width: 5%;
+  height: 20%;
+  background: var(--drive);
+}
+/* Components pulled in to give the label more room for long titles. */
+.m2 .ctrl {
+  position: absolute;
+  left: 4.2%;
+  top: 26%;
+  width: 5%;
+  height: 48%;
+  border-radius: 1px;
+  background: var(--drive-lo);
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.11);
+}
+.m2 .nand {
+  position: absolute;
+  width: 8.5%;
+  height: 38%;
+  border-radius: 1px;
+  background: var(--drive-lo);
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.09);
+}
+.m2 .n1 {
+  left: 11%;
+  top: 18%;
+}
+.m2 .n2 {
+  left: 11%;
+  top: 58%;
+  height: 25%;
+}
+.m2 .lab {
+  position: absolute;
+  left: 18.5%;
+  right: 6.5%;
+  top: 12%;
+  bottom: 12%;
+  background: linear-gradient(150deg, #0e2c25, #0a211b);
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+/* The drive that lives in the slot. This MUST come after .m2: both
+   selectors score 0-1-0, so .m2{position:relative} would otherwise win on
+   source order and drop the drive out of the board entirely. */
+.m2.seated {
+  position: absolute;
+  left: 17.692%;
+  top: 38.947%;
+  width: 61.538%;
+  height: 23.158%;
+}
+.m2.seated[hidden] {
+  display: none;
+}
