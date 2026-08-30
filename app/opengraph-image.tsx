@@ -14,8 +14,8 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "90px",
-          background: "#071512",
-          color: "#e8ede9",
+          background: "#04110F",
+          color: "#E8EEEC",
           fontFamily: "sans-serif",
         }}
       >
@@ -27,8 +27,8 @@ export default function OpengraphImage() {
             marginBottom: 28,
           }}
         >
-          <div style={{ width: 12, height: 12, borderRadius: 999, background: "#e23d28" }} />
-          <div style={{ fontSize: 22, letterSpacing: 6, color: "#8da59d", textTransform: "uppercase" }}>
+          <div style={{ width: 12, height: 12, borderRadius: 999, background: "#F0503A" }} />
+          <div style={{ fontSize: 22, letterSpacing: 6, color: "#84A099", textTransform: "uppercase" }}>
             Computer Engineering · UIUC · 2027
           </div>
         </div>
@@ -40,7 +40,7 @@ export default function OpengraphImage() {
             display: "flex",
             fontSize: 40,
             fontWeight: 500,
-            color: "#8da59d",
+            color: "#84A099",
             marginTop: 6,
           }}
         >
@@ -52,7 +52,7 @@ export default function OpengraphImage() {
             marginTop: 44,
             width: 120,
             height: 4,
-            background: "#c9962c",
+            background: "#D9AC55",
           }}
         />
       </div>

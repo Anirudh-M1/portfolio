@@ -13,8 +13,8 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#071512",
-          border: "1px solid #16382f",
+          background: "#04110F",
+          border: "1px solid #16382F",
           borderRadius: 4,
         }}
       >
@@ -22,7 +22,7 @@ export default function Icon() {
           style={{
             width: 12,
             height: 12,
-            border: "2px solid #c9962c",
+            border: "2px solid #D9AC55",
             borderRadius: 2,
           }}
         />
