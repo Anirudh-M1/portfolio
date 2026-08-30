@@ -144,4 +144,36 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [],
   },
+  {
+    kind: "project",
+    bank: "01 · INTERNSHIP",
+    id: "endpoint",
+    name: "Endpoint Sync",
+    tag: "PYTHON · AUTOMATION",
+    part: "ANR-EP-2280",
+    cap: "512 GB",
+    mount: "/endpoint",
+    kick: "Distributed infrastructure automation · Zebra Technologies",
+    heading: "Endpoint Pipeline",
+    tags: ["Python", "AsyncIO", "PowerShell", "ServiceNow", "CMDB", "REST"],
+    fields: [
+      {
+        term: "Problem",
+        body: "Collecting system metadata across the fleet took <b>2.5 hours</b> per run, which meant it effectively ran once and nobody trusted it as current.",
+      },
+      {
+        term: "Approach",
+        body: "Rebuilt the collector as an asynchronous Python and PowerShell pipeline, so endpoints are queried concurrently instead of walked in sequence.",
+      },
+      {
+        term: "Security",
+        body: "Added a synchronization layer aggregating <b>ServiceNow</b> REST APIs against the internal CMDB, automating vulnerability detection across the estate. It isolated <b>3,386</b> security vulnerabilities and removed <b>40</b> hours of manual audit per cycle.",
+      },
+      {
+        term: "Result",
+        body: "Runtime went from 2.5 hours to <b>under 2 minutes</b> across <b>10,000+</b> endpoints — a <b>98.5%</b> latency reduction. The work was commended directly by Zebra's <b>Chief Information Officer</b>.",
+      },
+    ],
+    links: [],
+  },
 ];
