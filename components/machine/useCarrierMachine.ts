@@ -468,6 +468,17 @@ export function useCarrierMachine() {
   const fit = useCallback(() => {
     const topEl = document.querySelector<HTMLElement>(".top");
     const mon = document.querySelector<HTMLElement>(".mon");
+    const card = document.querySelector<HTMLElement>(".card");
+    const fly = document.getElementById("fly");
+    // Pins the flight layer's vanishing point to the board's own rotation
+    // axis (50.526%, same fraction AXIS uses above), so a drive in flight
+    // is projected exactly the way the board itself is — without this, a
+    // flier and the board it's approaching would recede toward two
+    // different vanishing points and visibly fail to line up.
+    if (card && fly) {
+      const c = card.getBoundingClientRect();
+      fly.style.perspectiveOrigin = `${c.left + c.width / 2}px ${c.top + c.height * 0.50526}px`;
+    }
     if (topEl && mon) {
       const rowH = topEl.clientHeight,
         rowW = topEl.clientWidth;
@@ -724,6 +735,10 @@ export function useCarrierMachine() {
     fit();
     addEventListener("scroll", drawCables, { passive: true });
 
+    const topEl = document.querySelector<HTMLElement>(".top");
+    const ro = window.ResizeObserver && topEl ? new ResizeObserver(fit) : null;
+    if (ro && topEl) ro.observe(topEl);
+
     lastScrollYRef.current = scrollY;
     floatRafRef.current = requestAnimationFrame(floatStep);
 
@@ -733,6 +748,7 @@ export function useCarrierMachine() {
       rail?.removeEventListener("wheel", onWheel);
       removeEventListener("scroll", drawCables);
       if (floatRafRef.current !== null) cancelAnimationFrame(floatRafRef.current);
+      ro?.disconnect();
     };
     // Runs once on mount; mountState/land/clearTimers are stable via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
