@@ -176,4 +176,39 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [],
   },
+  {
+    kind: "project",
+    bank: "02 · DISTRIBUTED",
+    id: "logquery",
+    name: "Log Querier",
+    tag: "GO · RPC",
+    part: "ANR-LQ-2280",
+    cap: "128 GB",
+    mount: "/logquery",
+    kick: "Distributed logging · ECE 428 · MP1",
+    heading: "Log Querier",
+    tags: ["Go", "RPC", "Distributed grep"],
+    fields: [
+      {
+        term: "Problem",
+        body: "Query log files scattered across a cluster from any single machine, without copying them all to one place first.",
+      },
+      {
+        term: "Approach",
+        body: "Every server holds a bidirectional RPC connection to every other. Connections form lazily — if a peer is not up yet the server keeps running and links when it appears, so the mesh tolerates nodes starting in any order. A query fans out from the local server, each remote runs <b>grep</b> against its own file, and results are aggregated on the caller.",
+      },
+      {
+        term: "Benchmark",
+        body: "Five trials across five pattern frequencies on four machines, against <b>~60 MB</b> of generated logs at <b>~150,000</b> lines per file. Latency is dominated by transfer and scales with match count rather than file size — with count-only queries it flattens to <b>~100 ms</b> across every pattern.",
+      },
+      {
+        term: "Why it is here",
+        body: "This became the instrumentation the next three projects were benchmarked and debugged with. It is the bottom of the stack.",
+      },
+    ],
+    // The source links to a report PDF (/MP1-Distributed-Logging.pdf) that
+    // doesn't exist in public/ yet. Per the plan, omit the link entirely
+    // rather than ship a dead one — add it back once the file exists.
+    links: [],
+  },
 ];
