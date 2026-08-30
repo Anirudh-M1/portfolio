@@ -1,0 +1,13 @@
+/* The animated PCB background sits behind the whole page (z-index:0, so
+ * under the stage/docs at z-index:2). Ported here rather than left in
+ * machine.css — this canvas isn't part of the machine, it's the page's
+ * own backdrop, and pcb-canvas.css/PcbCanvas.tsx being one pair mirrors
+ * how docs/docs-crt and machine/machine.css are each self-contained. */
+#pcb {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
