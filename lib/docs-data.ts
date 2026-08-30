@@ -385,4 +385,32 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [],
   },
+  {
+    kind: "project",
+    bank: "04 · BUILT & LED",
+    id: "llmdev",
+    name: "LLM Assistant",
+    tag: "PYTHON · AST RAG",
+    part: "ANR-LD-2280",
+    cap: "256 GB",
+    mount: "/llm-assistant",
+    kick: "Semantic code retrieval · personal",
+    heading: "LLM Dev Assistant",
+    tags: ["Python", "LangChain", "FAISS", "FastAPI", "AsyncIO", "AST"],
+    fields: [
+      {
+        term: "Problem",
+        body: "Naive RAG over source code chunks by line count, which splits functions in half and retrieves fragments that do not mean anything on their own.",
+      },
+      {
+        term: "Approach",
+        body: "Chunk by Abstract Syntax Tree instead — split on real functional boundaries like classes and methods, so every retrieved unit is something a model can reason about whole.",
+      },
+      {
+        term: "Scale",
+        body: "An asynchronous ingestion pipeline parallelizes embedding generation, holding sub-second retrieval across <b>10+</b> concurrent repositories, served behind FastAPI with logging on query-to-explanation performance and retrieval accuracy.",
+      },
+    ],
+    links: [{ label: "Repository", href: "https://github.com/Anirudh-M1/llm-dev-assistant" }],
+  },
 ];
