@@ -167,6 +167,8 @@ export function PcbCanvas() {
     const ctx = cv?.getContext("2d");
     if (!cv || !ctx) return;
 
+    const soft = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
     type Pulse = { rt: Route; d: number; sp: number; w: number };
 
     let W = 0,
@@ -296,6 +298,15 @@ export function PcbCanvas() {
       build();
       pulses = Array.from({ length: CFG.pulses }, spawn);
       if (raf) cancelAnimationFrame(raf);
+      // Under reduced motion, draw the baked board once and stop there —
+      // no traveling pulses at all, not just slower ones. A board with
+      // signal traffic crawling across it is still motion for its own
+      // sake, which is exactly what this setting asks to opt out of.
+      if (soft) {
+        ctx!.clearRect(0, 0, W, H);
+        ctx!.drawImage(bake!, 0, 0, W, H);
+        return;
+      }
       last = performance.now();
       raf = requestAnimationFrame(frame);
     }
@@ -307,10 +318,28 @@ export function PcbCanvas() {
       t = setTimeout(init, 180);
     };
     addEventListener("resize", onResize);
+
+    // A canvas rAF loop keeps costing CPU/battery on a hidden tab unless
+    // something explicitly stops it — pause while not visible, and pick
+    // back up (re-baking isn't needed, just resuming the frame loop)
+    // once the tab is foregrounded again.
+    const onVisibility = () => {
+      if (soft) return;
+      if (document.hidden) {
+        if (raf) cancelAnimationFrame(raf);
+        raf = 0;
+      } else if (!raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       if (t) clearTimeout(t);
       if (raf) cancelAnimationFrame(raf);
       removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
