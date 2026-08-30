@@ -339,6 +339,57 @@ export function useCarrierMachine() {
     [land, makeFlight, mountState],
   );
 
+  const ejectDrive = useCallback(
+    (i: number) => {
+      const d = DOCS[i];
+      const rail = document.getElementById("rail");
+      const chips = rail ? [...rail.querySelectorAll<HTMLElement>(".chip")] : [];
+      const pockets = rail ? [...rail.querySelectorAll<HTMLElement>(".pocket")] : [];
+
+      setLoadedIndex(null);
+      chips[i]?.setAttribute("aria-current", "false");
+      const status = document.getElementById("status");
+      if (status) status.textContent = "—";
+
+      const F = makeFlight(d, chips[i]!.getBoundingClientRect());
+      const s = F.st;
+      // hand off at rest, where the flier and the seated drive coincide
+      s.u = 0;
+      s.hinge = 0;
+      s.pull = 0;
+      s.screw = 1;
+      const seated = document.getElementById("seated");
+      if (seated) {
+        (seated as HTMLElement).hidden = true;
+        seated.innerHTML = "";
+      }
+      F.paint();
+      idle();
+
+      return new Promise<void>((done) => {
+        timeline(
+          [
+            { at: 0, dur: 0.7, ease: E.p3io, from: REST, to: WORK, set: (v) => (tiltNowRef.current = v) },
+            { at: 0.48, dur: 0.26, ease: E.p2in, from: 1, to: 0, set: (v) => (s.screw = v) },
+            { at: 0.7, dur: 0.48, ease: E.backout, from: 0, to: LIFT, set: (v) => (s.hinge = v) },
+            { at: 0.86, dur: 0, from: 0, to: 1, set: () => ledOff() },
+            { at: 1.22, dur: 0.6, ease: E.p2io, from: 0, to: 1, set: (v) => (s.pull = v) },
+            { at: 1.87, dur: 0.7, ease: E.p3io, from: WORK, to: REST, set: (v) => (tiltNowRef.current = v) },
+            { at: 1.87, dur: 0.7, ease: E.p3io, from: LIFT, to: 0, set: (v) => (s.hinge = v) },
+            // and back to its pocket in the tray
+            { at: 2.27, dur: 0.85, ease: E.p3io, from: 0, to: 1, set: (v) => (s.u = v) },
+          ],
+          F.paint,
+          done,
+        );
+      }).then(() => {
+        F.remove();
+        pockets[i]?.classList.remove("out");
+      });
+    },
+    [idle, ledOff, makeFlight],
+  );
+
   /* Boot-on-mount: mirrors the source's own start() — the initial drive
    * (from the URL hash, or README) is already "in the machine" the
    * instant the stage reveals itself, so the screen is never dark. No
@@ -387,5 +438,5 @@ export function useCarrierMachine() {
     crt.scrollTop = 0;
   }, [screen]);
 
-  return { screen, loadedIndex, ready, crtRef, onCrtClick, idle, land, mountState, ledOff, insert };
+  return { screen, loadedIndex, ready, crtRef, onCrtClick, idle, land, mountState, ledOff, insert, ejectDrive };
 }
