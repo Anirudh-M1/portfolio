@@ -823,6 +823,7 @@ a {
    which get smoke-tested there rather than assumed to work here. */
 .m2 {
   position: relative;
+  container-type: inline-size;
   background: linear-gradient(158deg, var(--drive-hi), var(--drive) 42%, var(--drive-lo));
   border-radius: 2px 1px 1px 2px;
   font: inherit;
@@ -878,6 +879,25 @@ a {
   top: 58%;
   height: 25%;
 }
+/* The mounting notch is a hole, so it is round. Sized as a raw percentage
+   it stretched to the chip's own proportions and came out an ellipse.
+   Sizing in cqw with a 1:1 aspect keeps it circular whatever the chip's
+   aspect ratio happens to be — the whole reason .m2 declares
+   container-type:inline-size above. This is the fidelity-critical rule
+   this commit exists to isolate: if this project's Tailwind v4/PostCSS
+   pipeline ever strips or mis-transforms cqw, this is where it will show
+   up first, as an oval hole instead of a round one. */
+.m2 .notch {
+  position: absolute;
+  left: -1.2cqw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4.4cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--fr4-lo);
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.11), inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
 .m2 .lab {
   position: absolute;
   left: 18.5%;
@@ -887,10 +907,86 @@ a {
   background: linear-gradient(150deg, #0e2c25, #0a211b);
   border-radius: 1px;
   box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.1);
+  padding: 0 2.8cqw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+}
+.m2 .lab b {
+  display: block;
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-size: 6.5cqw;
+  color: var(--silk);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The part number used to sit absolutely positioned bottom-right, so a
+   long technology line ran straight underneath it. They share a row now
+   and the tag truncates instead of colliding. */
+.m2 .lab .meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.8cqw;
+  margin-top: 1.5cqw;
+  min-width: 0;
+}
+.m2 .lab i {
+  display: block;
+  font-style: normal;
+  font-size: 3.2cqw;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.m2 .lab em {
+  flex: 0 0 auto;
+  font-style: normal;
+  font-size: 2.8cqw;
+  letter-spacing: 0.12em;
+  color: var(--faint);
+  white-space: nowrap;
+}
+/* the screw appears only once the drive is home — round, seated in the
+   notch, with a cross drive rather than a single scratch */
+.m2 .screw {
+  position: absolute;
+  left: -1.2cqw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4.4cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #54786a 0%, #2e4c40 46%, #132520 100%);
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.42), inset 0 -0.5px 1px rgba(0, 0, 0, 0.7);
+}
+.m2 .screw::before,
+.m2 .screw::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: rgba(9, 18, 15, 0.9);
+  border-radius: 0.5px;
+}
+.m2 .screw::before {
+  width: 58%;
+  height: 14%;
+  transform: translate(-50%, -50%);
+}
+.m2 .screw::after {
+  width: 14%;
+  height: 58%;
+  transform: translate(-50%, -50%);
 }
 /* The drive that lives in the slot. This MUST come after .m2: both
    selectors score 0-1-0, so .m2{position:relative} would otherwise win on
