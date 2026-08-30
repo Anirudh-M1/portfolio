@@ -167,11 +167,16 @@ export function PcbCanvas() {
     const ctx = cv?.getContext("2d");
     if (!cv || !ctx) return;
 
+    type Pulse = { rt: Route; d: number; sp: number; w: number };
+
     let W = 0,
       H = 0,
       DPR = 1,
       bake: HTMLCanvasElement | null = null,
-      routes: Route[] = [];
+      routes: Route[] = [],
+      pulses: Pulse[] = [],
+      raf = 0,
+      last = 0;
 
     function build() {
       routes = [];
@@ -234,6 +239,51 @@ export function PcbCanvas() {
       bake = off;
     }
 
+    function spawn(): Pulse {
+      const rt = routes[RI(0, routes.length - 1)];
+      return { rt, d: -CFG.tail, sp: R(CFG.speed[0], CFG.speed[1]), w: Math.random() < 0.3 ? 1.8 : 1.2 };
+    }
+
+    /* A pulse is drawn as a fading trail of short segments walking back
+     * from its head, rather than a single glowing dot — that's what
+     * reads as travelling THROUGH the trace instead of just sliding a
+     * sprite over it. */
+    function frame(now: number) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      ctx!.clearRect(0, 0, W, H);
+      ctx!.drawImage(bake!, 0, 0, W, H);
+      pulses.forEach((p, idx) => {
+        p.d += p.sp * dt;
+        if (p.d - CFG.tail > p.rt.len) {
+          pulses[idx] = spawn();
+          return;
+        }
+        const STEP = 9,
+          n = Math.ceil(CFG.tail / STEP);
+        for (let i = 0; i < n; i++) {
+          const d = p.d - i * STEP;
+          if (d < 0 || d > p.rt.len) continue;
+          const a = Math.pow(1 - i / n, 2.1) * CFG.glow;
+          const A = at(p.rt, d),
+            B = at(p.rt, Math.max(0, d - STEP));
+          ctx!.beginPath();
+          ctx!.moveTo(A[0], A[1]);
+          ctx!.lineTo(B[0], B[1]);
+          ctx!.strokeStyle = `rgba(${COL.pulse},${Math.max(0, a)})`;
+          ctx!.lineWidth = p.w;
+          ctx!.lineCap = "round";
+          ctx!.stroke();
+        }
+        const head = at(p.rt, Math.min(p.d, p.rt.len));
+        ctx!.beginPath();
+        ctx!.arc(head[0], head[1], p.w * 1.9, 0, 7);
+        ctx!.fillStyle = `rgba(${COL.pulse},${0.55 * CFG.glow})`;
+        ctx!.fill();
+      });
+      raf = requestAnimationFrame(frame);
+    }
+
     function init() {
       W = innerWidth;
       H = innerHeight;
@@ -244,8 +294,10 @@ export function PcbCanvas() {
       cv!.style.height = H + "px";
       ctx!.setTransform(DPR, 0, 0, DPR, 0, 0);
       build();
-      ctx!.clearRect(0, 0, W, H);
-      ctx!.drawImage(bake!, 0, 0, W, H);
+      pulses = Array.from({ length: CFG.pulses }, spawn);
+      if (raf) cancelAnimationFrame(raf);
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
     }
 
     init();
@@ -257,6 +309,7 @@ export function PcbCanvas() {
     addEventListener("resize", onResize);
     return () => {
       if (t) clearTimeout(t);
+      if (raf) cancelAnimationFrame(raf);
       removeEventListener("resize", onResize);
     };
   }, []);
