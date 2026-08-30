@@ -112,4 +112,36 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [],
   },
+  {
+    kind: "project",
+    bank: "01 · INTERNSHIP",
+    id: "pbi",
+    name: "PBI Sentinel",
+    tag: "PYTHON · INFRA",
+    part: "ANR-PB-2280",
+    cap: "512 GB",
+    mount: "/pbi-sentinel",
+    kick: "Autonomous infrastructure optimization · Zebra Technologies",
+    heading: "PBI Sentinel",
+    tags: ["Python", "GCP Cloud Run", "Databricks", "PostgreSQL", "MS Graph API", "Optimization"],
+    fields: [
+      {
+        term: "Diagnosis",
+        body: "Analyzed production metadata and found the cluster was hitting a <b>234%</b> concurrent load peak on P3 nodes, and that <b>27,000</b> report refreshes a month were running for reports nobody opened. The zombie reports were the evidence that the scheduling was unmanaged — they justified the work rather than being the fix.",
+      },
+      {
+        term: "Approach",
+        body: "Designed a greedy optimization algorithm using quadratic and exponential weighting to rank refresh jobs and redistribute them into optimal windows. The savings come from the redistribution, not from deleting anything.",
+      },
+      {
+        term: "Autonomy",
+        body: "Wrapped it in an agent on <b>GCP Cloud Run</b> reading Databricks Unity Catalog and PostgreSQL, which negotiates new refresh times directly with report owners over <b>Microsoft Teams</b> via the MS Graph API. It asks rather than reassigns, which is why people accepted it.",
+      },
+      {
+        term: "Result",
+        body: "Projected peak load held under <b>55%</b> capacity, saving <b>$11K/month</b>.",
+      },
+    ],
+    links: [],
+  },
 ];
