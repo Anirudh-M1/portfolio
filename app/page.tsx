@@ -1,5 +1,5 @@
-import { Carrier } from "@/components/carrier/Carrier";
+import { Site } from "@/components/site/Site";
 
 export default function Home() {
-  return <Carrier />;
+  return <Site />;
 }
