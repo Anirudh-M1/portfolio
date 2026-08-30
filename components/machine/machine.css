@@ -123,6 +123,60 @@ a {
   transform-origin: 30% 46%;
 }
 
+/* The screen is the only light source in this scene. ::before is the warm
+   bounce it throws back onto the room; ::after is ambient occlusion — the
+   object darkening what sits near it. Without the second one the monitor
+   reads as a sprite pasted over the background rather than an object in
+   it.
+
+   The panel is effectively a lamp, so the area around it gets brighter,
+   not darker. Two stages: a tight warm rim hugging the bezel, and a wide
+   soft bloom beyond it. Ambient occlusion still exists but is pulled in
+   close and downward, where the case actually shades the surface it
+   stands on.
+
+   Isolated in its own commit: get either radius, blur or opacity even
+   slightly wrong here and the monitor either looks like a sticker (bloom
+   too weak) or like it's floating in a halo (bloom too strong) — one of
+   the three most visually fragile spots in this design. */
+.mon::before {
+  content: "";
+  position: absolute;
+  left: -26%;
+  top: -18%;
+  width: 152%;
+  height: 150%;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 44%,
+    rgba(var(--phos-rgb), 0.155) 0%,
+    rgba(var(--phos-rgb), 0.075) 34%,
+    rgba(var(--phos-rgb), 0.026) 58%,
+    transparent 78%
+  );
+  filter: blur(62px);
+}
+.mon::after {
+  content: "";
+  position: absolute;
+  left: -8%;
+  top: -6%;
+  width: 116%;
+  height: 112%;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 44px;
+  background: radial-gradient(
+    ellipse at 50% 44%,
+    rgba(var(--phos-rgb), 0.135) 0%,
+    rgba(var(--phos-rgb), 0.042) 52%,
+    transparent 76%
+  );
+  filter: blur(26px);
+}
+
 .panel {
   position: relative;
   z-index: 2;
