@@ -557,6 +557,14 @@ export function useCarrierMachine() {
       const chips = rail ? [...rail.querySelectorAll<HTMLElement>(".chip")] : [];
       pockets[i]?.classList.add("out");
 
+      if (reduced) {
+        tiltNowRef.current = REST;
+        paintTilt();
+        mountState(i);
+        land(i);
+        return Promise.resolve();
+      }
+
       const F = makeFlight(d, chips[i]!.getBoundingClientRect());
       const s = F.st;
       F.paint();
@@ -591,7 +599,7 @@ export function useCarrierMachine() {
         F.remove();
       });
     },
-    [land, makeFlight, mountState],
+    [land, makeFlight, mountState, paintTilt],
   );
 
   const ejectDrive = useCallback(
@@ -605,6 +613,18 @@ export function useCarrierMachine() {
       chips[i]?.setAttribute("aria-current", "false");
       const status = document.getElementById("status");
       if (status) status.textContent = "—";
+
+      if (reduced) {
+        ledOff();
+        const seated = document.getElementById("seated");
+        if (seated) {
+          (seated as HTMLElement).hidden = true;
+          seated.innerHTML = "";
+        }
+        pockets[i]?.classList.remove("out");
+        idle();
+        return Promise.resolve();
+      }
 
       const F = makeFlight(d, chips[i]!.getBoundingClientRect());
       const s = F.st;
@@ -739,8 +759,15 @@ export function useCarrierMachine() {
     const ro = window.ResizeObserver && topEl ? new ResizeObserver(fit) : null;
     if (ro && topEl) ro.observe(topEl);
 
-    lastScrollYRef.current = scrollY;
-    floatRafRef.current = requestAnimationFrame(floatStep);
+    // The whole levitation spring is skipped outright under reduced
+    // motion, not just slowed down — a suspended object that gently
+    // drifts and pitches on scroll is motion for its own sake, exactly
+    // what prefers-reduced-motion is asking to opt out of. The monitor
+    // simply sits at its CSS rest transform instead.
+    if (!reduced) {
+      lastScrollYRef.current = scrollY;
+      floatRafRef.current = requestAnimationFrame(floatStep);
+    }
 
     // Deep links stay live after boot: editing the URL hash, or using
     // back/forward through history the machine itself pushed via
