@@ -249,4 +249,42 @@ export const DOCS: DriveDoc[] = [
     // Log Querier (file not supplied yet).
     links: [],
   },
+  {
+    kind: "project",
+    bank: "02 · DISTRIBUTED",
+    id: "rainstorm",
+    name: "RainStorm",
+    tag: "GO · STREAMING",
+    part: "ANR-RS-2280",
+    cap: "512 GB",
+    mount: "/rainstorm",
+    kick: "Distributed stream engine · ECE 428",
+    heading: "RainStorm",
+    tags: ["Go", "Goroutines", "RPC", "Scheduling", "Fault tolerance"],
+    fields: [
+      {
+        term: "Problem",
+        body: "Run continuous stateful operators over a stream without losing records when a worker dies mid-flight.",
+      },
+      {
+        term: "Approach",
+        body: "A leader-worker model where the leader schedules by load against a synchronized availability map. Operators run over a worker pool with at-least-once delivery, and state is checkpointed through HyDFS underneath. Routing supports shuffle, broadcast and fields-grouping.",
+      },
+      {
+        term: "Fault tolerance",
+        body: "A ping/ack channel system monitors tasks in real time and restarts them on failure, with the leader reassigning work when a member drops out.",
+      },
+      {
+        term: "Benchmark",
+        body: "Measured head-to-head against Spark Streaming on two Kaggle datasets: 7M lines of US traffic accidents and 23M lines of listening history for 500K users. On grep-replace Spark ran 503 tuples/sec to RainStorm's 322; on aggregate-transform, 2812 to 1757.",
+      },
+      {
+        term: "Why it is slower",
+        body: "About 40%, and the cause is specific: every output tuple and every log entry is a separate HyDFS append, so a run produces millions of one-line files and millions of requests. The bottleneck is the storage layer beneath it, not the scheduler. Batching appends and combining file output is the fix, and knowing exactly where the cost sits was the point of measuring.",
+      },
+    ],
+    // Source links to /MP4-RainStorm.pdf — omitted, same reason as the
+    // other ECE 428 MPs (file not supplied yet).
+    links: [],
+  },
 ];
