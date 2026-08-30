@@ -461,8 +461,15 @@ export function useCarrierMachine() {
   /* Boot-on-mount: mirrors the source's own start() — the initial drive
    * (from the URL hash, or README) is already "in the machine" the
    * instant the stage reveals itself, so the screen is never dark. No
-   * flight animation plays for this one; insert()'s flight (next commit)
-   * is only for drives loaded after the machine is already live. */
+   * flight animation plays for this one; insert()'s flight is only for
+   * drives loaded after the machine is already live.
+   *
+   * Also registers the tray's wheel-to-scroll behavior natively rather
+   * than via React's onWheel: React's root listener registers wheel as
+   * passive for scroll-performance reasons, so a synthetic onWheel
+   * handler's preventDefault() is silently ignored. The source's own
+   * script hits the same constraint and explicitly opts back out with
+   * {passive:false} — this does the same. */
   useEffect(() => {
     document.body.classList.add("js");
     document.getElementById("pwr")?.classList.add("on");
@@ -475,9 +482,19 @@ export function useCarrierMachine() {
     land(i);
     setReady(true);
 
+    const onWheel = (e: WheelEvent) => {
+      if (!rail) return;
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        rail.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    };
+    rail?.addEventListener("wheel", onWheel, { passive: false });
+
     return () => {
       clearTimers();
       if (ledTimerRef.current !== null) clearTimeout(ledTimerRef.current);
+      rail?.removeEventListener("wheel", onWheel);
     };
     // Runs once on mount; mountState/land/clearTimers are stable via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps

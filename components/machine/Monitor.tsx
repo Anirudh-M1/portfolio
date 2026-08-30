@@ -56,10 +56,10 @@ export function Monitor({ machine }: MonitorProps) {
               NO LINK
             </span>
             <span className="stnav">
-              <button type="button" id="prevD" aria-label="Previous drive">
+              <button type="button" id="prevD" aria-label="Previous drive" disabled={machine.busy} onClick={() => machine.step(-1)}>
                 &#8249; PREV
               </button>
-              <button type="button" id="nextD" aria-label="Next drive">
+              <button type="button" id="nextD" aria-label="Next drive" disabled={machine.busy} onClick={() => machine.step(1)}>
                 NEXT &#8250;
               </button>
             </span>

@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from "react";
 import { DOCS, type DriveDoc } from "@/lib/docs-data";
 import type { useCarrierMachine } from "./useCarrierMachine";
 import "./machine.css";
@@ -47,6 +48,21 @@ export interface TrayProps {
   machine: ReturnType<typeof useCarrierMachine>;
 }
 
+/* Arrow keys walk the tray one chip at a time, wrapping around — the
+ * same behavior as Tab, but without leaving the rail. */
+function onRailKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+  const rail = e.currentTarget;
+  const chips = [...rail.querySelectorAll<HTMLElement>(".chip")];
+  const i = chips.indexOf(document.activeElement as HTMLElement);
+  if (i < 0) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    e.preventDefault();
+    const n = (i + (e.key === "ArrowRight" ? 1 : chips.length - 1)) % chips.length;
+    chips[n].focus();
+    chips[n].scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+}
+
 export function Tray({ machine }: TrayProps) {
   const banks = buildBanks(DOCS);
   let i = 0;
@@ -59,7 +75,7 @@ export function Tray({ machine }: TrayProps) {
           Select one to load
         </span>
       </div>
-      <div className="rail" id="rail" role="list">
+      <div className="rail" id="rail" role="list" onKeyDown={onRailKeyDown}>
         {banks.map((b) => (
           <div className="bank" key={b.bank}>
             <span className="bank-tab">{b.bank}</span>
