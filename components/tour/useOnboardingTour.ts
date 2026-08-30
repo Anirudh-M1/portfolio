@@ -141,6 +141,13 @@ export function useOnboardingTour() {
   }, [endTour, stepNext]);
 
   const startTour = useCallback(() => {
+    // Full skip, not just a faster version: this guard covers BOTH the
+    // auto-start effect and the "?" button's manual replay, since both
+    // call straight into this function. A guided overlay whose whole
+    // point is spotlight motion and typewriter reveal has nothing left to
+    // offer once both of those are turned off — there's no reduced-
+    // motion variant of this feature to fall back to, only skipping it.
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     setOn(true);
     setVeiled(false);
     setStepIndex(0);
@@ -192,6 +199,20 @@ export function useOnboardingTour() {
     // Runs once on mount; startTour is stable via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* Escape always gets you out, matching every other dismissible overlay
+   * on the web — Skip is the click equivalent, but a keyboard-only or
+   * just-startled visitor shouldn't have to hunt for the button. Only
+   * listens while the tour is actually on, so it doesn't compete with
+   * whatever else on the page might want Escape. */
+  useEffect(() => {
+    if (!on) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") endTour();
+    };
+    addEventListener("keydown", onKeyDown);
+    return () => removeEventListener("keydown", onKeyDown);
+  }, [on, endTour]);
 
   useEffect(
     () => () => {
