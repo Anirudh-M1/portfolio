@@ -1,0 +1,162 @@
+/* ============================================================
+   below the fold — shared chrome for every .sec (Experience,
+   Education, Skills, Contact) and the closing footer.
+   Ported verbatim from the source prototype.
+   ============================================================ */
+.after {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(70px, 11vh, 120px) clamp(20px, 6vw, 40px) 110px;
+}
+.sec {
+  margin-bottom: 70px;
+}
+.sec:last-child {
+  margin-bottom: 0;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.eyebrow .t {
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.eyebrow .ln {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.sec h3 {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
+  margin-bottom: 20px;
+}
+.job {
+  display: grid;
+  grid-template-columns: 142px 1fr;
+  gap: 22px;
+  padding: 19px 0;
+  border-top: 1px solid var(--line);
+}
+.job:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.job .when {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding-top: 5px;
+}
+.job h4 {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.job p,
+.body {
+  font-size: 12.5px;
+  line-height: 1.78;
+  color: var(--dim);
+  max-width: 62ch;
+}
+.job .when em {
+  display: block;
+  font-style: normal;
+  margin-top: 5px;
+  letter-spacing: 0.14em;
+  color: rgba(217, 172, 85, 0.6);
+}
+.pts {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-width: 66ch;
+}
+.pts li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 9px;
+  font-size: 12.5px;
+  line-height: 1.72;
+  color: var(--dim);
+}
+.pts li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: rgba(217, 172, 85, 0.55);
+  box-shadow: 0 0 7px rgba(217, 172, 85, 0.3);
+}
+.pts b {
+  color: var(--silk);
+  font-weight: 600;
+}
+.job p b,
+.body b {
+  color: var(--silk);
+  font-weight: 600;
+}
+.co {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.slabel {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  display: block;
+  margin-top: 4px;
+}
+.co + .slabel {
+  margin-bottom: 16px;
+}
+.contact a {
+  color: var(--silk);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(211, 160, 58, 0.5);
+}
+.contact a:hover {
+  border-bottom-color: var(--gold);
+  color: var(--gold);
+}
+.contact p {
+  font-size: 13.5px;
+  line-height: 2;
+}
+footer {
+  border-top: 1px solid var(--line);
+  padding: 24px clamp(20px, 6vw, 40px);
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 560px) {
+  .job {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

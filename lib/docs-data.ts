@@ -53,6 +53,76 @@ export interface ProjectDoc extends DriveDocBase {
 
 export type DriveDoc = ReadmeDoc | ProjectDoc;
 
+export interface ExperienceJob {
+  when: string;
+  emphasis: string;
+  title: string;
+  intro: string;
+  bullets: string[];
+}
+
+export interface ExperienceData {
+  eyebrow: string;
+  company: string;
+  companyMeta: string;
+  jobs: ExperienceJob[];
+}
+
+export const EXPERIENCE: ExperienceData = {
+  eyebrow: "Experience",
+  company: "Zebra Technologies",
+  companyMeta: "Lincolnshire, Illinois · Two consecutive internships",
+  jobs: [
+    {
+      when: "May – Aug 2026",
+      emphasis: "AI & Cloud Platform",
+      title: "Software Engineer Intern — AI & Cloud Platform",
+      intro:
+        "Owned two production systems: a conversational RAG agent over proprietary bill-of-materials data, and an autonomous agent that renegotiates the reporting cluster's own schedule.",
+      bullets: [
+        "Architected and deployed an enterprise RAG agent inside the Zebra Data Lake via <b>BigQuery</b> and <b>Databricks</b>, indexing BOM blueprints so analysts can query alternate suppliers and transition schemes in natural language during supplier blackouts — protecting fulfillment for Amazon, Target and Walmart.",
+        "Diagnosed cluster bottlenecks from production metadata, surfacing a <b>234%</b> concurrent load peak on P3 nodes and <b>27K</b> monthly refreshes of reports nobody opened.",
+        "Designed a greedy optimization algorithm using quadratic and exponential weighting to redistribute refresh windows, holding projected peak load under <b>55%</b> capacity and saving <b>$11K/month</b>.",
+        "Shipped that as an autonomous agent on <b>GCP Cloud Run</b> reading Databricks Unity Catalog and PostgreSQL, negotiating new schedules directly with report owners over Microsoft Teams via the MS Graph API.",
+        "Built a prompt evaluation harness with <b>150+</b> test cases, moving agent accuracy from <b>71%</b> to <b>94%</b> and cutting hallucinations <b>60%</b>.",
+      ],
+    },
+    {
+      when: "May – Aug 2025",
+      emphasis: "Cloud & Computing",
+      title: "Software Engineer Intern — Cloud & Computing",
+      intro:
+        "Rebuilt fleet metadata collection and wired it into vulnerability detection. The automation was commended directly by Zebra's Chief Information Officer, and the work earned the return offer above.",
+      bullets: [
+        "Engineered an asynchronous <b>Python</b> and <b>PowerShell</b> pipeline to extract and process system metadata, cutting runtime from <b>2.5 hours</b> to <b>under 2 minutes</b> across <b>10,000+</b> endpoints — a <b>98.5%</b> latency reduction.",
+        "Implemented a scalable synchronization layer aggregating <b>ServiceNow</b> REST APIs against internal CMDB databases, automating vulnerability detection to isolate <b>3,386</b> security vulnerabilities.",
+        "Eliminated <b>40</b> hours of manual audit work per cycle.",
+      ],
+    },
+    {
+      when: "May 2024 – Present",
+      emphasis: "Executive Board",
+      title: "Director of Operations — Design for America, UIUC",
+      intro: "Managing delivery and architecture across the chapter's engineering teams.",
+      bullets: [
+        "Own SDLC and architecture across <b>7</b> teams totalling <b>56</b> members, directly leading two of them.",
+        "Translated community requirements into MVPs and shipped <b>2</b> to live partners serving <b>100+</b> users.",
+        "Engineered an open-source teaching workshop on a <b>Java 17</b> Spring Boot REST API with JPA, enforcing decoupled architecture through DTOs and mappers and a centralized <b>@ControllerAdvice</b> exception framework.",
+      ],
+    },
+    {
+      when: "Dec 2020 – May 2024",
+      emphasis: "Founder",
+      title: "Founder — Chicagoland Help Forum",
+      intro: "Founded during the pandemic and run for over three years while enrolled full-time.",
+      bullets: [
+        "Scaled a community platform to <b>300+</b> users and raised <b>$5,400+</b> for under-served students with <b>100%</b> donor transparency.",
+        "Designed and maintained a responsive <b>React</b> and <b>Node.js</b> platform generating <b>13,000+</b> page views in 2024, shipping continuous releases through a GitHub Actions CI/CD pipeline.",
+      ],
+    },
+  ],
+};
+
 /** Drives in tray order — this is also load order for keyboard/PREV-NEXT
  * navigation and the order banks are built in. */
 export const DOCS: DriveDoc[] = [
