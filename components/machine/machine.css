@@ -105,3 +105,222 @@ a {
   align-items: center;
   min-height: 0;
 }
+
+/* ---------- monitor ----------
+   Bezel-less panel. Built from boxes rather than an SVG because there is
+   no curvature or moulding to describe — the whole form is flat planes,
+   which CSS renders more crisply than a scaled vector ever will. */
+/* Pushed left and turned inward. Positive rotateY brings the LEFT edge
+   forward, which aims the screen to the right — toward the board — so the
+   two read as one machine rather than two objects side by side. */
+.mon {
+  position: relative;
+  z-index: 2;
+  justify-self: start;
+  width: 100%;
+  transform: perspective(2600px) rotateX(2.5deg) rotateY(9deg);
+  will-change: transform;
+  transform-origin: 30% 46%;
+}
+
+.panel {
+  position: relative;
+  z-index: 2;
+  border-radius: 11px;
+  padding: 4px 4px 27px;
+  background: linear-gradient(150deg, var(--case-hi) 0%, var(--case) 30%, var(--case-lo) 72%, var(--case-dk) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 242, 224, 0.07) inset, 0 34px 54px -26px rgba(0, 0, 0, 0.92),
+    0 0 22px 2px rgba(0, 0, 0, 0.35), 0 2px 0 rgba(255, 242, 224, 0.06) inset;
+}
+/* brushed-aluminium grain: directional micro-streaks, not a smooth gradient */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 11px;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(113deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(113deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 4px);
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+/* machined edge catching the light */
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 11px;
+  pointer-events: none;
+  background: linear-gradient(102deg, rgba(255, 255, 255, 0.1) 0 12%, transparent 30%);
+}
+/* The chin sits directly beneath the panel, so it catches the most spill of
+   any surface on the case: warm at the top edge, falling off downward. */
+.chin {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--phos-rgb), 0.075) 0%,
+    rgba(var(--phos-rgb), 0.038) 40%,
+    rgba(var(--phos-rgb), 0.012) 74%,
+    transparent 100%
+  );
+}
+.wordmark {
+  position: relative;
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 9.5px;
+  letter-spacing: 0.3em;
+  color: rgba(255, 242, 224, 0.46);
+}
+.pwr {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #243528;
+  transition: 0.4s;
+}
+.pwr.on {
+  background: #84e45f;
+  box-shadow: 0 0 7px rgba(132, 228, 95, 0.9);
+}
+
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: radial-gradient(128% 140% at 50% 40%, #15110b 0%, var(--glass) 66%, #070b09 100%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.85) inset;
+}
+/* A flat panel has no scanlines and no tube curvature. What it does have is
+   the room reflected faintly in the glass — so the sheen is tinted with the
+   environment's green, not a neutral white streak, and the corners fall off. */
+.glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(108deg, rgba(126, 154, 145, 0.05) 0 18%, transparent 38%),
+    linear-gradient(196deg, rgba(126, 154, 145, 0.035) 0 26%, transparent 46%),
+    radial-gradient(130% 120% at 50% 36%, transparent 62%, rgba(0, 0, 0, 0.42) 100%);
+}
+.crt {
+  position: absolute;
+  inset: 0;
+  padding: clamp(16px, 3.6%, 34px) clamp(20px, 4.4%, 44px) 4.2em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  color: var(--phos);
+  font-size: clamp(11px, 1vw, 14px);
+  line-height: 1.72;
+  text-shadow: 0 0 7px rgba(255, 190, 104, 0.26);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 190, 104, 0.3) transparent;
+}
+.crt::-webkit-scrollbar {
+  width: 7px;
+}
+.crt::-webkit-scrollbar-thumb {
+  background: rgba(255, 190, 104, 0.26);
+  border-radius: 4px;
+}
+.crt:focus-visible {
+  outline: 2px solid var(--phos);
+  outline-offset: -4px;
+}
+
+/* Status line — the screen's own chrome. Fills what was dead space at the
+   bottom of the panel with the drive data the machine actually has. */
+.statusline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5em;
+  padding: 0.62em clamp(20px, 4.4%, 44px);
+  font-size: clamp(8.5px, 0.74vw, 10.5px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(var(--phos-rgb), 0.5);
+  border-top: 1px solid rgba(var(--phos-rgb), 0.14);
+  /* Opaque. A near-transparent gradient here let description text
+     scrolling underneath show straight through the bar and collide with
+     the status text. */
+  background: linear-gradient(180deg, rgba(10, 15, 14, 0.94), rgba(8, 13, 12, 0.985));
+}
+/* content fades out as it reaches the bar instead of sliding under a hard edge */
+.statusline::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 26px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(8, 13, 12, 0), rgba(8, 13, 12, 0.92));
+}
+.statusline span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Step through drives without touching the tray at all. */
+.stnav {
+  display: flex;
+  gap: 0.5em;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.stnav button {
+  font: inherit;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--scr-link);
+  background: transparent;
+  cursor: pointer;
+  border: 1px solid rgba(155, 210, 230, 0.3);
+  border-radius: 2px;
+  padding: 0.3em 0.7em;
+  transition: 0.16s;
+}
+.stnav button:hover:not(:disabled) {
+  border-color: rgba(155, 210, 230, 0.7);
+  color: #cfebf7;
+  text-shadow: 0 0 8px rgba(155, 210, 230, 0.5);
+}
+.stnav button:focus-visible {
+  outline: 2px solid var(--scr-link);
+  outline-offset: 2px;
+}
+.stnav button:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+.statusline #stLink {
+  color: rgba(var(--phos-rgb), 0.34);
+}
+.statusline.live #stLink {
+  color: var(--phos-lo);
+}
