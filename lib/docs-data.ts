@@ -357,4 +357,32 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [],
   },
+  {
+    kind: "project",
+    bank: "03 · LOW-LEVEL",
+    id: "frogger",
+    name: "Frogger FPGA",
+    tag: "SYSTEMVERILOG",
+    part: "ANR-FR-2280",
+    cap: "64 GB",
+    mount: "/frogger",
+    kick: "Hardware design · ECE 385",
+    heading: "Frogger FPGA",
+    tags: ["SystemVerilog", "FPGA", "MicroBlaze", "HDMI"],
+    fields: [
+      {
+        term: "Scope",
+        body: "A playable Frogger implemented in SystemVerilog on FPGA, with a MicroBlaze soft processor handling control and HDMI output driving the display.",
+      },
+      {
+        term: "Related",
+        body: "Also implemented SLC-3.2, a 16-bit RISC microprocessor in SystemVerilog, focused on instruction cycle timing and memory interfacing.",
+      },
+      {
+        term: "Why it is here",
+        body: "Most of my work is a few layers up. This is the layer everything else is standing on, and it is useful to have actually built it.",
+      },
+    ],
+    links: [],
+  },
 ];
