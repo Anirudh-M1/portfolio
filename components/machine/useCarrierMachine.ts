@@ -460,6 +460,42 @@ export function useCarrierMachine() {
     floatRafRef.current = requestAnimationFrame(floatStep);
   }, [drawCables, nudge]);
 
+  /* Keep the geometry honest whenever the layout can change size. Sizes
+   * the BOARD first — it's the thing being looked at — then gives the
+   * monitor whatever space is left, both derived from measured space
+   * rather than hand-tuned max-widths (which kept pushing the board off
+   * screen every time the numbers changed elsewhere). */
+  const fit = useCallback(() => {
+    const topEl = document.querySelector<HTMLElement>(".top");
+    const mon = document.querySelector<HTMLElement>(".mon");
+    if (topEl && mon) {
+      const rowH = topEl.clientHeight,
+        rowW = topEl.clientWidth;
+      if (rowH > 0 && rowW > 0) {
+        const gap = parseFloat(getComputedStyle(topEl).columnGap) || 24;
+        const byH = Math.max(0, rowH - 104) * 1.78;
+        mon.style.maxWidth = Math.max(280, Math.min(byH, rowW * 0.74, 1240)) + "px";
+        /* The monitor is sized by the height available to it, so on short
+         * viewports it can't use the width it's given and the surplus
+         * sits empty between the two objects. Handing that remainder to
+         * the carrier column instead kills the dead gap and stops the
+         * board's SVG rendering below 1:1.
+         *
+         * The carrier column needs a floor, but expressing it as
+         * minmax(300px,1fr) let the two columns demand more than the row
+         * actually has on narrow laptops, pushing the whole stage past
+         * the viewport — so the floor comes out of the monitor's width
+         * instead, leaving the track itself free to shrink. */
+        const monW = Math.max(280, Math.min(parseFloat(mon.style.maxWidth) || 0, rowW - 300 - gap));
+        mon.style.maxWidth = monW + "px";
+        topEl.style.gridTemplateColumns = `${monW}px minmax(0,1fr)`;
+      }
+    }
+    cacheGeo();
+    measureFloatRange();
+    drawCables();
+  }, [cacheGeo, drawCables, measureFloatRange]);
+
   /* A drive in flight. Its box is parked on the slot and everything is
    * expressed as a transform away from there, so "arrived" is transform
    * identity — exactly the pose the seated drive already has. */
@@ -685,9 +721,7 @@ export function useCarrierMachine() {
     };
     rail?.addEventListener("wheel", onWheel, { passive: false });
 
-    cacheGeo();
-    measureFloatRange();
-    drawCables();
+    fit();
     addEventListener("scroll", drawCables, { passive: true });
 
     lastScrollYRef.current = scrollY;
