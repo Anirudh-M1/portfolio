@@ -1,0 +1,31 @@
+/* Site-shell-level rules that don't belong to any one component: which of
+ * the interactive stage vs. the .docs fallback is actually shown, and the
+ * one page-wide reduced-motion override. Ported verbatim from the source
+ * prototype's closing CSS block. */
+
+/* Once JS has booted the machine (useCarrierMachine's mount effect adds
+ * this class to <body>), the .docs fallback is redundant — hide it. A
+ * no-JS visitor never gets the "js" class at all, so they keep .docs
+ * and never see the (nonexistent, for them) stage. */
+body.js .docs {
+  display: none;
+}
+/* Below this size the machine's fixed layout math (the board's tilt,
+ * the monitor's levitation range, the tray's shingle) has nowhere near
+ * enough room to work — rather than fight it down to an unusable size,
+ * the same media query that would otherwise show a broken stage shows
+ * the plain-document fallback instead, same content, no interactivity. */
+@media (max-width: 960px), (max-height: 600px) {
+  body.js .stage,
+  body.js .fly {
+    display: none;
+  }
+  body.js .docs {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
