@@ -41,6 +41,17 @@ export function useOnboardingTour() {
   const [nextEnabled, setNextEnabled] = useState(false);
   const [spot, setSpot] = useState<TourUiState["spot"]>(null);
 
+  // Captured once, on the very first render — via useState's lazy
+  // initializer, which runs before ANY effect does, including a child
+  // component's. That matters here specifically: useCarrierMachine's own
+  // mount effect (in Machine, a child of whatever renders this hook)
+  // calls history.replaceState to stamp the loaded drive's id onto the
+  // hash the instant it boots — even when nothing was actually deep-
+  // linked. Reading location.hash inside THIS hook's own effect would
+  // read that already-stamped value and misdetect every fresh visit as
+  // a deep link, since React runs child effects before parent ones.
+  const [wasDeepLinked] = useState(() => typeof window !== "undefined" && location.hash.length > 1);
+
   const typerRef = useRef<number | null>(null);
   const trackRafRef = useRef<number | null>(null);
   const stepIndexRef = useRef(0);
@@ -183,14 +194,13 @@ export function useOnboardingTour() {
       typeof window !== "undefined" &&
       !!window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const deepLinked = typeof location !== "undefined" && location.hash.length > 1;
     let seen = false;
     try {
       seen = !!localStorage.getItem("carrier-tour-seen");
     } catch {
       /* private browsing, storage disabled — treat as unseen */
     }
-    if (reduced || deepLinked || seen) return;
+    if (reduced || wasDeepLinked || seen) return;
 
     const t = setTimeout(() => {
       startTour();
