@@ -2,8 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-// Weight lists are pruned to what's actually referenced in carrier.css /
-// carrier-mobile.css (checked via grep) — no unused weights riding along.
+// Weight lists are pruned to what's actually referenced across the new
+// design's CSS (checked via grep) — no unused weights riding along.
+// IBM Plex Mono 600 is new: docs-crt.css/after.css bold metric numbers,
+// CRT links and .pts/.job body copy at that weight, all on the
+// monospace body font, not Archivo — Archivo's own weights (used only
+// for headings/wordmarks) are unchanged from the old design.
 const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
@@ -14,16 +18,18 @@ const archivo = Archivo({
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
-const TITLE = "Anirudh Moholkar — Distributed Systems & Backend Infrastructure";
-const DESCRIPTION =
-  "Portfolio of Anirudh Moholkar — distributed systems, agent infrastructure, and the projects behind them.";
+const TITLE = "Anirudh Moholkar — Systems & Backend Infrastructure";
+const DESCRIPTION = "Anirudh Moholkar. Computer Engineering at UIUC. Distributed systems and backend infrastructure.";
 
 export const viewport: Viewport = {
-  themeColor: "#071512",
+  // Matches the new design's --void background token (machine.css),
+  // not the old carrier-board design's near-identical but distinct
+  // #071512.
+  themeColor: "#04110F",
 };
 
 export const metadata: Metadata = {
