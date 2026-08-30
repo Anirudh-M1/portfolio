@@ -1001,3 +1001,45 @@ a {
 .m2.seated[hidden] {
   display: none;
 }
+
+/* ---------- flight layer ---------- */
+/* Same perspective as .card, and useCarrierMachine (section E) pins
+   perspective-origin to the board's centre, so a drive in flight is
+   projected exactly the way the board is. The three nested layers mirror
+   the board's own transform chain (tilt -> travel -> hinge) so the
+   hand-off at the end is pixel-exact. */
+.fly {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  perspective: 3000px;
+}
+/* preserve-3d on every layer above the hinge. Without it the browser
+   flattens each level into its parent's plane, and the hinge's rotateY
+   renders as a flat horizontal squash instead of the drive tilting up. */
+.flyx {
+  position: fixed;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.flyy {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+/* hinge pivots on the socket end, the way an M.2 actually goes in */
+.flyh {
+  position: absolute;
+  inset: 0;
+  transform-origin: 100% 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.flyh > .m2 {
+  position: absolute;
+  inset: 0;
+}
