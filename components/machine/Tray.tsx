@@ -69,17 +69,33 @@ export function Tray({ machine }: TrayProps) {
   return (
     <div className="tray">
       <div className="trayhead">
-        <span className="t">Drives</span>
+        <span className="t" id="trayTitle">
+          Drives
+        </span>
         <span className="ln" />
         <span className="hint" id="hint">
           Select one to load
         </span>
       </div>
-      <div className="rail" id="rail" role="list" onKeyDown={onRailKeyDown}>
+      {/* The source's #rail carries role="list" directly over .bank/
+       * .bank-row wrapper divs, with .pocket (role="listitem") several
+       * levels of plain <div> below it. Per the ARIA list/listitem
+       * relationship, an owned role needs to resolve through the
+       * accessibility tree without an unrelated role breaking the chain —
+       * a bare div is pruned from that tree, but two of them stacked is
+       * enough for some browsers to stop treating the pockets as list
+       * items at all. Fixed here rather than carried over: each bank is a
+       * labelled group (role="group", named from the same string
+       * .bank-tab already shows visually), and each bank-row is its own
+       * list of drives — so role="list"/"listitem" is never separated by
+       * more than the labelled group in between. */}
+      <div className="rail" id="rail" aria-labelledby="trayTitle" onKeyDown={onRailKeyDown}>
         {banks.map((b) => (
-          <div className="bank" key={b.bank}>
-            <span className="bank-tab">{b.bank}</span>
-            <div className="bank-row">
+          <div className="bank" key={b.bank} role="group" aria-label={b.bank}>
+            <span className="bank-tab" aria-hidden="true">
+              {b.bank}
+            </span>
+            <div className="bank-row" role="list">
               {b.docs.map((d) => {
                 const idx = i++;
                 return (
