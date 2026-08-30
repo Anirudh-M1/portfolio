@@ -646,6 +646,102 @@ a {
   align-items: stretch;
 }
 
+/* Drives are shingled, each sitting slightly proud of the one behind it
+   and stepped down so the pile has a readable top edge — like cards dealt
+   into a row rather than slabs dropped on each other. The offset keeps
+   every drive's NAME clear of the card in front, which is what a plain
+   overlap gets wrong: it cuts labels mid-word.
+
+   This block is its own commit: the shingle depends on three things
+   staying in lockstep — the negative margin-left pulling cards together,
+   .spine's cover-label sized to exactly the strip that stays exposed, and
+   the hover/focus-within un-shingle transition sharing one clock with the
+   spine's opacity fade. Change one without the other two and either the
+   labels collide again or the un-shingle animation reads as choppy. */
+.bank-row .pocket + .pocket {
+  margin-left: calc(-1 * var(--shingle, 118px));
+  transition: margin-left 0.44s cubic-bezier(0.22, 1, 0.36, 1), transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bank-row .pocket {
+  transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* a lit edge on the leading side so each card reads as a separate object */
+.bank:hover .bank-row .pocket + .pocket,
+.bank:focus-within .bank-row .pocket + .pocket {
+  margin-left: 10px;
+}
+.bank-row .pocket:hover,
+.bank-row .pocket:focus-within {
+  z-index: 9;
+}
+
+/* The exposed edge of a covered drive carries its own label. Cropping the
+   full chip instead left names sliced mid-word — the chip's title starts
+   past the connector pads, so any overlap worth having ate it. This is a
+   deliberate spine, sized to exactly the exposed strip. */
+.spine {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 11px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 8;
+  /* Covers the whole drive. Shading only the exposed strip left a hard
+     seam where the overlay stopped, and during the fan that seam swept
+     across the card as it slid out — which is the edge that read as
+     unsmooth. */
+  background: linear-gradient(90deg, #111d19 0%, #0d1815 46%, #0a1310 100%);
+  border: 1px solid rgba(232, 238, 236, 0.09);
+  /* The drop shadow rides the spine so shadow and label fade as one
+     thing, on the same clock as the cards moving. A separate pseudo-
+     element with a shorter duration is what read as choppy before — the
+     shadow snapped off before the drives finished sliding. */
+  box-shadow: -9px 0 20px 1px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bank:not(:hover):not(:focus-within) .bank-row .pocket:not(:last-child) .spine {
+  opacity: 1;
+}
+.spine .sn {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 236, 0.82);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spine .sp {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: rgba(217, 172, 85, 0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spine .sb {
+  position: absolute;
+  left: calc(var(--shingle, 118px) - 3px);
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, transparent, rgba(217, 172, 85, 0.45), transparent);
+}
+/* label stays in the strip that is actually visible */
+.spine .sn,
+.spine .sp {
+  max-width: calc(var(--shingle, 118px) - 22px);
+}
+
 .pocket {
   position: relative;
   flex: 0 0 auto;
