@@ -1,0 +1,66 @@
+/* ---------- guided tour: dim overlay, spotlight, click-blocking panes ----
+   Adapted from the old carrier-board design's tour.css — these mechanics
+   (a spotlight hole punched through a dimmed viewport, four panes around
+   it that swallow every click outside the hole) don't depend on what the
+   tour is pointing at, so they carry over structurally unchanged even
+   though the steps themselves are new. */
+.tut {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+.tut.on {
+  opacity: 1;
+  visibility: visible;
+}
+.spot {
+  position: fixed;
+  border-radius: 5px;
+  border: 1px solid rgba(217, 172, 85, 0.55);
+  box-shadow: 0 0 0 9999px rgba(3, 10, 9, 0.8), 0 0 26px rgba(217, 172, 85, 0.16) inset;
+  transition: top 0.55s cubic-bezier(0.2, 0.8, 0.25, 1), left 0.55s cubic-bezier(0.2, 0.8, 0.25, 1),
+    width 0.55s cubic-bezier(0.2, 0.8, 0.25, 1), height 0.55s cubic-bezier(0.2, 0.8, 0.25, 1), opacity 0.4s ease;
+}
+.spot b {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--gold);
+  display: block;
+}
+.spot b:nth-child(1) {
+  left: -2px;
+  top: -2px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.spot b:nth-child(2) {
+  right: -2px;
+  top: -2px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.spot b:nth-child(3) {
+  left: -2px;
+  bottom: -2px;
+  border-right: 0;
+  border-top: 0;
+}
+.spot b:nth-child(4) {
+  right: -2px;
+  bottom: -2px;
+  border-left: 0;
+  border-top: 0;
+}
+/* four panes around the spotlight — they swallow every click outside it,
+ * so a step's spotlight is the only thing on the page still interactive */
+.blk {
+  position: fixed;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 199;
+}
