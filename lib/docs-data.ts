@@ -413,4 +413,36 @@ export const DOCS: DriveDoc[] = [
     ],
     links: [{ label: "Repository", href: "https://github.com/Anirudh-M1/llm-dev-assistant" }],
   },
+  {
+    kind: "project",
+    bank: "04 · BUILT & LED",
+    id: "dfa",
+    name: "DFA Workshop",
+    tag: "JAVA · SPRING BOOT",
+    part: "ANR-DF-2280",
+    cap: "256 GB",
+    mount: "/dfa",
+    kick: "Director of Operations · Design for America, UIUC",
+    heading: "DFA Workshop",
+    tags: ["Java 17", "Spring Boot", "JPA", "REST", "Maven"],
+    fields: [
+      {
+        term: "Role",
+        body: "Managing SDLC and architecture across <b>7</b> teams and <b>56</b> members, directly leading two. Translated community requirements into MVPs and shipped <b>2</b> to live partners serving <b>100+</b> users.",
+      },
+      {
+        term: "Problem",
+        body: "The teaching material was a monolithic single-file client. It worked, but it taught nobody how real systems are layered.",
+      },
+      {
+        term: "Approach",
+        body: "Rebuilt it as a Java 17 Spring Boot REST API with a strict Controller → Service → Repository chain, using DTOs and mappers to stop JPA entities leaking to clients, plus a centralized <b>@ControllerAdvice</b> handler that returns structured ApiError JSON instead of white-label stack traces.",
+      },
+      {
+        term: "Frontend",
+        body: "Decoupled layout, presentation and scripts, with an async fetch pipeline using lazy rendering and a fallback state cache so the client stays stable when the API does not.",
+      },
+    ],
+    links: [{ label: "Repository", href: "https://github.com/Anirudh-M1/Full-Stack-Data-Design-Workshop" }],
+  },
 ];
