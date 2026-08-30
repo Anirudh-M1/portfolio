@@ -224,3 +224,58 @@
   font-weight: 600;
   text-shadow: 0 0 7px rgba(255, 217, 168, 0.34);
 }
+
+/* ---------- empty-slot / boot-log state ----------
+   Its own commit: this is what the screen shows when nothing is loaded
+   (.doc.none, the "NO DEVICE" idle message) and while a drive is booting
+   (.post, the typed BIOS-style log) — states that only exist once
+   useCarrierMachine can drive them, but the CSS is pure and doesn't need
+   to wait for that. */
+.crt .post {
+  font: inherit;
+  white-space: pre-wrap;
+  margin: 0;
+  color: rgba(var(--phos-rgb), 0.85);
+}
+.crt .post b {
+  color: var(--phos-hi);
+  font-weight: 600;
+  text-shadow: 0 0 9px rgba(var(--phos-rgb), 0.5);
+}
+.crt .doc.none b {
+  display: block;
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.5em;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5em;
+  color: var(--phos-hi);
+  text-shadow: 0 0 11px rgba(var(--phos-rgb), 0.4);
+}
+/* blinking terminal cursor, reused by both the idle message and (later)
+   the tour's typewriter callout */
+.cur {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 0.2em;
+  vertical-align: -0.18em;
+  background: var(--phos);
+  box-shadow: 0 0 8px rgba(var(--phos-rgb), 0.6);
+  animation: blink 1.06s steps(1) infinite;
+}
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cur {
+    animation: none;
+  }
+}
