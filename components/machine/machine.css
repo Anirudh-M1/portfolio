@@ -540,3 +540,180 @@ a {
   opacity: 0.3;
   cursor: default;
 }
+
+/* ---------- the tray ---------- */
+.tray {
+  margin-top: clamp(12px, 2vh, 22px);
+  position: relative;
+  z-index: 3;
+}
+.trayhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 7px;
+  padding: 0 clamp(2px, 1vw, 10px);
+}
+.trayhead .t {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.trayhead .ln {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.trayhead .hint {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.rail {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: linear-gradient(180deg, #0a1f1a, #06130f);
+  box-shadow: 0 0 0 1px rgba(228, 235, 230, 0.09) inset, 0 14px 34px -18px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(228, 235, 230, 0.05) inset;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(211, 160, 58, 0.3) transparent;
+  scroll-behavior: smooth;
+}
+.rail::-webkit-scrollbar {
+  height: 6px;
+}
+.rail::-webkit-scrollbar-thumb {
+  background: rgba(211, 160, 58, 0.28);
+  border-radius: 3px;
+}
+/* A bank is a labelled slot group. The label sits horizontally above its
+   drives rather than as a vertical spine — rotated type forced the bay
+   taller than the drives needed and was hard to read at this size. */
+.bank {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 0 0 auto;
+  position: relative;
+}
+.bank + .bank {
+  margin-left: 20px;
+  padding-left: 20px;
+}
+.bank + .bank::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(217, 172, 85, 0.28) 22%,
+    rgba(217, 172, 85, 0.28) 78%,
+    transparent
+  );
+}
+.bank-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 2px;
+  font-size: 8px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(217, 172, 85, 0.66);
+}
+.bank-tab::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  min-width: 14px;
+  background: linear-gradient(90deg, rgba(217, 172, 85, 0.26), transparent);
+}
+.bank-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.pocket {
+  position: relative;
+  flex: 0 0 auto;
+  width: 232px;
+  height: 64px;
+  border-radius: 4px;
+}
+.bank-row .pocket:nth-child(1) {
+  z-index: 2;
+}
+.bank-row .pocket:nth-child(2) {
+  z-index: 3;
+}
+.bank-row .pocket:nth-child(3) {
+  z-index: 4;
+}
+.bank-row .pocket:nth-child(4) {
+  z-index: 5;
+}
+
+/* foam recess, revealed when the drive is out of the tray */
+.pocket::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: #040d0b;
+  pointer-events: none;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.75) inset, 0 0 0 1px rgba(228, 235, 230, 0.06);
+  opacity: 0;
+  transition: opacity 0.28s;
+}
+.pocket::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(228, 235, 230, 0.22);
+  opacity: 0;
+  transition: opacity 0.28s;
+}
+.pocket.out::before,
+.pocket.out::after {
+  opacity: 1;
+}
+.chip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.25, 1), box-shadow 0.2s, filter 0.2s;
+}
+.chip:hover {
+  transform: translateY(-6px);
+  filter: brightness(1.15);
+  box-shadow: 0 0 0 1px rgba(211, 160, 58, 0.5), 0 22px 30px -14px rgba(0, 0, 0, 0.95);
+}
+.pocket.out .chip {
+  opacity: 0;
+  pointer-events: none;
+}
+.chip[aria-current="true"] {
+  box-shadow: 0 0 0 1px rgba(211, 160, 58, 0.6), 0 12px 22px -10px rgba(0, 0, 0, 0.9);
+}
