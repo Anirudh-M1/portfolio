@@ -32,6 +32,10 @@ interface DriveDocBase {
 
 export interface ReadmeDoc extends DriveDocBase {
   kind: "readme";
+  /** Two-line display name for the h1 ("Anirudh" / "Moholkar"), rendered
+   * with a hard <br> between them as in the source — distinct from the
+   * drive's own `name` ("README"). */
+  heading: [string, string];
   sub: string;
   portrait: { src: string; alt: string };
   lede: string;
@@ -211,6 +215,7 @@ export const DOCS: DriveDoc[] = [
     part: "ANR-RM-2280",
     cap: "—",
     mount: "/home",
+    heading: ["Anirudh", "Moholkar"],
     sub: "Distributed systems &amp; backend infrastructure",
     portrait: { src: "/portrait.jpg", alt: "Anirudh Moholkar" },
     lede:
