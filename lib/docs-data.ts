@@ -123,6 +123,29 @@ export const EXPERIENCE: ExperienceData = {
   ],
 };
 
+export interface EducationData {
+  eyebrow: string;
+  school: string;
+  program: string;
+  gpaLine: string;
+  gpaTag: string;
+  body: string;
+  bullets: string[];
+}
+
+export const EDUCATION: EducationData = {
+  eyebrow: "Education",
+  school: "University of Illinois Urbana-Champaign",
+  program: "B.S. Computer Engineering · Grainger College of Engineering · Expected May 2027",
+  gpaLine: "GPA 3.79 / 4.0",
+  gpaTag: "Dean's List",
+  body: "James Scholar and recipient of the <b>Fiddler Innovation Award</b>.",
+  bullets: [
+    "<b>Systems:</b> Computer Systems &amp; Programming, Distributed Systems, Data Structures &amp; Algorithms",
+    "<b>AI:</b> Artificial Intelligence, Applied Machine Learning, Reinforcement Learning",
+  ],
+};
+
 /** Drives in tray order — this is also load order for keyboard/PREV-NEXT
  * navigation and the order banks are built in. */
 export const DOCS: DriveDoc[] = [
