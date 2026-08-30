@@ -165,6 +165,34 @@ export function useOnboardingTour() {
     endTour();
   }, [endTour]);
 
+  /* Runs once per browser, and never on a deep-linked landing — jumping
+   * straight to a specific drive means the visitor already knows where
+   * they're going, and starting the tour would reset them to the
+   * README/step 0 they didn't ask for. Also skipped outright under
+   * reduced motion (checked again in the next commit, alongside
+   * Escape-to-skip) and if the seen-flag is already set. */
+  useEffect(() => {
+    const reduced =
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const deepLinked = typeof location !== "undefined" && location.hash.length > 1;
+    let seen = false;
+    try {
+      seen = !!localStorage.getItem("carrier-tour-seen");
+    } catch {
+      /* private browsing, storage disabled — treat as unseen */
+    }
+    if (reduced || deepLinked || seen) return;
+
+    const t = setTimeout(() => {
+      startTour();
+    }, 3400);
+    return () => clearTimeout(t);
+    // Runs once on mount; startTour is stable via useCallback.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(
     () => () => {
       if (typerRef.current !== null) clearInterval(typerRef.current);
