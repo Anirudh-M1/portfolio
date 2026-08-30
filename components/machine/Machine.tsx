@@ -1,25 +1,32 @@
+"use client";
+
 import { Cables } from "./Cables";
 import { Monitor } from "./Monitor";
 import { CarrierBoard } from "./CarrierBoard";
 import { Tray } from "./Tray";
 import { FlightLayer } from "./FlightLayer";
+import { useCarrierMachine } from "./useCarrierMachine";
 import "./machine.css";
 
-/* Static composition of the interactive machine: cables behind, monitor
- * and carrier board side by side in .top, the drive tray below, and the
- * flight layer for in-transit drives on top of everything. `hidden` here
- * matches the source prototype's boot sequence — the stage starts hidden
- * and only reveals itself once JS confirms it can actually drive the
- * machine, which is exactly what useCarrierMachine's mount effect
- * (section E) will flip off. Not referenced by app/page.tsx yet; that
- * happens at the cutover commit in section H. */
+/* Composition of the interactive machine: cables behind, monitor and
+ * carrier board side by side in .top, the drive tray below, and the
+ * flight layer for in-transit drives on top of everything.
+ *
+ * useCarrierMachine's mount effect flips `hidden` off .stage and boots the
+ * initial drive (from the URL hash, or README) the instant it runs, so
+ * the `hidden` attribute below is only ever the pre-hydration state — a
+ * visitor without JS, or before this effect has run, sees nothing here at
+ * all and gets the .docs fallback instead (the media-query swap between
+ * the two is wired at the section H cutover). Not referenced by
+ * app/page.tsx yet — the old carrier-board design still owns the page. */
 export function Machine() {
+  const machine = useCarrierMachine();
   return (
     <>
-      <div className="stage" id="stage" hidden>
+      <div className="stage" id="stage" hidden={!machine.ready}>
         <div className="top">
           <Cables />
-          <Monitor />
+          <Monitor machine={machine} />
           <CarrierBoard />
         </div>
         <Tray />
