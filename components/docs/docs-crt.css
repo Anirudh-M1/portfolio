@@ -1,0 +1,134 @@
+/* ---------- type ON THE SCREEN ----------
+   docs.css is scoped to .docs (the no-JS fallback). Once the interactive
+   machine exists, the same DriveDoc content renders again inside .crt,
+   wrapped in a .doc div — different ancestor, so none of docs.css's rules
+   match, and the CRT screen needs its own scale entirely.
+
+   Sized in em against .crt's own font-size so the hierarchy scales with
+   the monitor, and coloured by luminance — one phosphor hue, several
+   intensities — the way a real amber panel actually reads: not several
+   hues fighting for attention, just brighter and dimmer versions of the
+   same warm colour. Bloom is proportional too: bright type haloes (larger
+   text-shadow blur/alpha), dim type barely does.
+
+   Ported verbatim from the source prototype. */
+.crt .doc h1 {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 2.55em;
+  line-height: 1.02;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  color: var(--phos-hi);
+  text-shadow: 0 0 14px rgba(var(--phos-rgb), 0.5);
+}
+.crt .doc h1 .sub {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.24em;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  margin-top: 1.1em;
+  text-transform: none;
+  color: rgba(var(--phos-rgb), 0.66);
+  text-shadow: 0 0 5px rgba(var(--phos-rgb), 0.2);
+}
+.crt .doc h2 {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.72em;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  color: var(--phos-hi);
+  text-shadow: 0 0 11px rgba(var(--phos-rgb), 0.42);
+}
+.crt .doc .kick {
+  font-size: 0.72em;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 0.7em;
+  color: var(--scr-key);
+  text-shadow: 0 0 6px rgba(143, 214, 188, 0.3);
+}
+.crt .doc .rule {
+  height: 1px;
+  margin: 1.15em 0;
+  border: 0;
+  background: linear-gradient(90deg, rgba(var(--phos-rgb), 0.42), rgba(var(--phos-rgb), 0.07));
+}
+.crt .doc p {
+  margin-bottom: 0.9em;
+  max-width: 62ch;
+  color: rgba(var(--phos-rgb), 0.82);
+  text-shadow: 0 0 6px rgba(var(--phos-rgb), 0.16);
+}
+.crt .doc .lede {
+  color: var(--phos-hi);
+  text-shadow: 0 0 8px rgba(var(--phos-rgb), 0.26);
+}
+.crt .doc {
+  position: relative;
+}
+.crt .doc dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6em 1.5em;
+  margin: 0.3em 0 1.1em;
+}
+.crt .doc dt {
+  font-size: 0.72em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding-top: 0.45em;
+  white-space: nowrap;
+  color: var(--scr-key);
+  text-shadow: 0 0 6px rgba(143, 214, 188, 0.28);
+}
+.crt .doc dd {
+  max-width: 58ch;
+  color: rgba(var(--phos-rgb), 0.8);
+  text-shadow: 0 0 6px rgba(var(--phos-rgb), 0.14);
+}
+.crt .doc .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45em;
+  margin: 1.1em 0 0.3em;
+}
+.crt .doc .tags span {
+  font-size: 0.72em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid rgba(143, 214, 188, 0.26);
+  border-radius: 2px;
+  padding: 0.35em 0.7em;
+  color: rgba(143, 214, 188, 0.8);
+}
+.crt .doc .links {
+  clear: both;
+  display: flex;
+  gap: 1.3em;
+  margin-top: 1.15em;
+  flex-wrap: wrap;
+}
+.crt .doc a {
+  color: var(--scr-link);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(155, 210, 230, 0.42);
+  text-shadow: 0 0 7px rgba(155, 210, 230, 0.3);
+  transition: 0.16s;
+}
+.crt .doc a:hover {
+  border-bottom-color: var(--scr-link);
+  text-shadow: 0 0 13px rgba(155, 210, 230, 0.65);
+}
+/* Metrics carry by luminance rather than hue. A saturated yellow at body
+   size on a near-black panel buzzes against the amber around it, and
+   adding a glow smears it further — so these are simply the brightest
+   text on the screen, which separates cleanly without introducing a
+   fourth colour. */
+.crt .doc b {
+  color: #ffeeda;
+  font-weight: 600;
+  text-shadow: 0 0 7px rgba(255, 217, 168, 0.34);
+}
