@@ -1,5 +1,6 @@
+import { Fragment } from "react";
 import Image from "next/image";
-import type { DriveDoc, ReadmeDoc } from "@/lib/docs-data";
+import type { DriveDoc, ProjectDoc, ReadmeDoc } from "@/lib/docs-data";
 
 /* DocBody renders the actual content for a drive — the same markup shape
  * is used in two very different-looking places: the plain `.docs` no-JS/
@@ -35,8 +36,39 @@ function ReadmeBody({ doc }: { doc: ReadmeDoc }) {
   );
 }
 
+function ProjectBody({ doc }: { doc: ProjectDoc }) {
+  return (
+    <>
+      <p className="kick">{doc.kick}</p>
+      <h2>{doc.heading}</h2>
+      <div className="rule" />
+      <div className="tags">
+        {doc.tags.map((t) => (
+          <span key={t}>{t}</span>
+        ))}
+      </div>
+      <dl>
+        {doc.fields.map((f) => (
+          <Fragment key={f.term}>
+            <dt>{f.term}</dt>
+            <dd dangerouslySetInnerHTML={{ __html: f.body }} />
+          </Fragment>
+        ))}
+      </dl>
+      {doc.links.length > 0 && (
+        <div className="links">
+          {doc.links.map((link) => (
+            <a key={link.href} href={link.href} target="_blank" rel="noopener">
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export function DocBody({ doc }: { doc: DriveDoc }) {
   if (doc.kind === "readme") return <ReadmeBody doc={doc} />;
-  // Project-variant rendering lands in the next commit.
-  return null;
+  return <ProjectBody doc={doc} />;
 }
