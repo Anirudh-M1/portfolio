@@ -325,4 +325,36 @@ export const DOCS: DriveDoc[] = [
     // ECE 428 MPs (file not supplied yet).
     links: [],
   },
+  {
+    kind: "project",
+    bank: "03 · LOW-LEVEL",
+    id: "kernel",
+    name: "RV Kernel",
+    tag: "C · RISC-V",
+    part: "ANR-RV-2280",
+    cap: "128 GB",
+    mount: "/kernel",
+    kick: "Operating system kernel · ECE 391",
+    heading: "RV Kernel",
+    tags: ["C", "RISC-V", "Virtual memory", "Scheduling", "IPC", "GDB"],
+    fields: [
+      {
+        term: "Scope",
+        body: "A kernel in C supporting full process lifecycles: context switching, a preemptive scheduler, and concurrent user-mode execution.",
+      },
+      {
+        term: "Virtual memory",
+        body: "A virtual memory manager with page table handling, lazy page allocation, and mapping logic specialized for per-process stack segments.",
+      },
+      {
+        term: "System infrastructure",
+        body: "An ELF loader for user binaries, and pipes for inter-process communication and I/O redirection.",
+      },
+      {
+        term: "Result",
+        body: "Reduced memory overhead <b>28%</b> under concurrent workloads by optimizing page allocation and address translation, and diagnosed low-level race conditions that only appeared under contention.",
+      },
+    ],
+    links: [],
+  },
 ];
