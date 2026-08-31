@@ -650,9 +650,19 @@ a {
    the hover/focus-within un-shingle transition sharing one clock with the
    spine's opacity fade. Change one without the other two and either the
    labels collide again or the un-shingle animation reads as choppy. */
+/* Layout spacing is ALWAYS the expanded 10px gap — margin-left never
+ * animates. Only `transform` moves a shingled pocket, and transform is
+ * paint-only: it never resizes `.bank`'s own box. That matters because
+ * `.bank:hover` is what drives the un-shingle below — if hovering shifted
+ * `.bank`'s actual layout width (the old margin-left approach), the
+ * pointer could end up outside the container mid-transition, un-hovering
+ * it, snapping pockets back under the pointer, re-hovering it, and so on
+ * forever. Keeping `.bank` a fixed size sidesteps that feedback loop
+ * entirely; only the visual position of each pocket moves. */
 .bank-row .pocket + .pocket {
-  margin-left: calc(-1 * var(--shingle, 118px));
-  transition: margin-left 0.44s cubic-bezier(0.22, 1, 0.36, 1), transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+  margin-left: 10px;
+  transform: translateX(calc(-1 * (var(--shingle, 118px) + 10px)));
+  transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bank-row .pocket {
   transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
@@ -660,7 +670,7 @@ a {
 /* a lit edge on the leading side so each card reads as a separate object */
 .bank:hover .bank-row .pocket + .pocket,
 .bank:focus-within .bank-row .pocket + .pocket {
-  margin-left: 10px;
+  transform: translateX(0);
 }
 .bank-row .pocket:hover,
 .bank-row .pocket:focus-within {
