@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Anirudh Moholkar — Portfolio
 
-## Getting Started
+Next.js 15 (App Router) + TypeScript + Tailwind v4 portfolio, built around a
+CRT-monitor-and-drive-tray metaphor: thirteen projects live as M.2 drives in a
+tray, and loading one boots its write-up onto a monitor screen sitting beside
+a physical carrier board.
 
-First, run the development server:
+## Stack
+
+- Next.js 15 App Router, React 19, TypeScript
+- Tailwind v4 (`@tailwindcss/postcss`) — the machine's visual design is plain
+  CSS custom properties and container queries, not Tailwind utility classes
+- No animation library. The insert/eject flight, the monitor's levitation
+  spring, and the CRT boot-log typing are hand-rolled `requestAnimationFrame`
+  code (`lib/carrier-motion.ts`, `components/machine/useCarrierMachine.ts`)
+
+## Structure
+
+| Path | What it is |
+|---|---|
+| `lib/docs-data.ts` | Single source of truth for all 13 drives plus Experience/Education/Skills/Contact — both the interactive screen and the no-JS/small-screen fallback render from this |
+| `lib/carrier-motion.ts` | Easings + timeline driver the insert/eject flight animations run on |
+| `lib/tour-steps.ts` | Onboarding tour step data |
+| `components/docs/` | `DocBody` (shared renderer for a drive's content), `DocsFallback` (plain-document view), `docs.css`/`docs-crt.css` (two themes for the same markup) |
+| `components/machine/` | The interactive stage: monitor, carrier board, cables, tray, flight layer, and `useCarrierMachine` (the hook that drives all of it) |
+| `components/pcb/` | The animated procedural PCB canvas behind the whole page |
+| `components/tour/` | The onboarding tour overlay |
+| `components/site/` | Nav bar, below-the-fold sections, footer, the "?" tour replay button, and `Site.tsx` (composes everything) |
+
+## Responsive story
+
+One layout, not a desktop/mobile split: `components/site/site.css`'s media
+query (`max-width:960px, max-height:600px`) swaps the interactive stage for
+`DocsFallback` — the same content, same `lib/docs-data.ts` source, just a
+plain document instead of a monitor and a tray. There's no `matchMedia` or
+`next/dynamic` branch in the React tree for this; it's CSS.
+
+## Fidelity-sensitive constants
+
+`PERSP = 3000`, `AXIS = 0.50526`, `FY = 0.78` in
+`components/machine/useCarrierMachine.ts` must stay numerically identical to
+`perspective(3000px)` and `.tilt`'s `transform-origin: 50% 50.526%` in
+`components/machine/machine.css` — a mismatch desyncs the cable loom from the
+board's visual tilt. Search both files for these names before changing
+either.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build   # production build + type check + lint
+npm run lint    # eslint only
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Known gaps
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Five links are intentionally omitted pending real files in `public/`:
+`Anirudh_Moholkar_Resume.pdf` (nav bar) and four ECE 428 report PDFs
+(`MP1-Distributed-Logging.pdf`, `MP2-Group-Membership.pdf`, `MP3-HyDFS.pdf`,
+`MP4-RainStorm.pdf`, linked from Log Querier/Membership/HyDFS/RainStorm).
+See `build-checklist.md`.
