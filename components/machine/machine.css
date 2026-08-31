@@ -661,11 +661,29 @@ a {
  * entirely; only the visual position of each pocket moves. */
 .bank-row .pocket + .pocket {
   margin-left: 10px;
-  transform: translateX(calc(-1 * (var(--shingle, 118px) + 10px)));
   transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bank-row .pocket {
   transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Each pocket's shift has to compound with every one before it, the same
+ * way the old margin-left approach did automatically (its shift fed back
+ * into the next sibling's flow position). A flat translateX(-128px) on
+ * every non-first pocket only closes the gap against the one directly
+ * behind it — the 3rd+ pocket in a bank needs to first catch up to the
+ * one before it (which has *also* shifted) and then overlap by its own
+ * 128px on top of that, or the shingle only holds for pairs and opens
+ * into a real gap from the 3rd card on. Explicit per-position rules
+ * because CSS has no sibling-index() to multiply in calc() yet; bump
+ * these if a bank ever needs a 5th slot. */
+.bank-row .pocket:nth-child(2) {
+  transform: translateX(calc(-1 * (var(--shingle, 118px) + 10px)));
+}
+.bank-row .pocket:nth-child(3) {
+  transform: translateX(calc(-2 * (var(--shingle, 118px) + 10px)));
+}
+.bank-row .pocket:nth-child(4) {
+  transform: translateX(calc(-3 * (var(--shingle, 118px) + 10px)));
 }
 /* a lit edge on the leading side so each card reads as a separate object */
 .bank:hover .bank-row .pocket + .pocket,
