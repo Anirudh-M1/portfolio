@@ -650,45 +650,36 @@ a {
    the hover/focus-within un-shingle transition sharing one clock with the
    spine's opacity fade. Change one without the other two and either the
    labels collide again or the un-shingle animation reads as choppy. */
-/* Layout spacing is ALWAYS the expanded 10px gap — margin-left never
- * animates. Only `transform` moves a shingled pocket, and transform is
- * paint-only: it never resizes `.bank`'s own box. That matters because
- * `.bank:hover` is what drives the un-shingle below — if hovering shifted
- * `.bank`'s actual layout width (the old margin-left approach), the
- * pointer could end up outside the container mid-transition, un-hovering
- * it, snapping pockets back under the pointer, re-hovering it, and so on
- * forever. Keeping `.bank` a fixed size sidesteps that feedback loop
- * entirely; only the visual position of each pocket moves. */
+/* margin-left is back driving the real layout position (not a paint-only
+ * transform) because the whole point of this pass is that `.bank`'s own
+ * box has to genuinely shrink and grow with it — a collapsed bank should
+ * only take up as much of the rail as its overlapped cards actually need,
+ * not reserve the fully fanned-out width all the time. That's also what
+ * makes the overlap compound correctly through a bank with 3+ drives for
+ * free: margin-left is layout-affecting, so pocket N's shift becomes part
+ * of what pocket N+1's own flow position is computed from, the same way
+ * `left`/`top` chain together in any normal flex row. A flat, uncompounded
+ * transform (tried first) can't do that without per-position overrides.
+ *
+ * The risk with margin-left driving `.bank:hover` is the one this design
+ * hit before: shifting `.bank`'s own box on hover can slide it out from
+ * under a mouse that hasn't moved, un-hovering it, snapping back, and
+ * re-hovering forever. The fix isn't to stop `.bank` from resizing — it's
+ * to stop that resize from ever starting on a hover that's about to be
+ * immediately reversed. Collapsing back (mouse leaves) waits out a short
+ * delay with the geometry frozen; if the mouse re-enters inside that
+ * window — including a re-entry the collapse's own motion would have
+ * caused — the delayed collapse never fires and nothing moves. Expanding
+ * (mouse enters) stays instant either way, since growing not shrinking is
+ * what makes the just-entered pocket immediately hit-testable. */
 .bank-row .pocket + .pocket {
-  margin-left: 10px;
-  transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+  margin-left: calc(-1 * var(--shingle, 118px));
+  transition: margin-left 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
 }
-.bank-row .pocket {
-  transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
-}
-/* Each pocket's shift has to compound with every one before it, the same
- * way the old margin-left approach did automatically (its shift fed back
- * into the next sibling's flow position). A flat translateX(-128px) on
- * every non-first pocket only closes the gap against the one directly
- * behind it — the 3rd+ pocket in a bank needs to first catch up to the
- * one before it (which has *also* shifted) and then overlap by its own
- * 128px on top of that, or the shingle only holds for pairs and opens
- * into a real gap from the 3rd card on. Explicit per-position rules
- * because CSS has no sibling-index() to multiply in calc() yet; bump
- * these if a bank ever needs a 5th slot. */
-.bank-row .pocket:nth-child(2) {
-  transform: translateX(calc(-1 * (var(--shingle, 118px) + 10px)));
-}
-.bank-row .pocket:nth-child(3) {
-  transform: translateX(calc(-2 * (var(--shingle, 118px) + 10px)));
-}
-.bank-row .pocket:nth-child(4) {
-  transform: translateX(calc(-3 * (var(--shingle, 118px) + 10px)));
-}
-/* a lit edge on the leading side so each card reads as a separate object */
 .bank:hover .bank-row .pocket + .pocket,
 .bank:focus-within .bank-row .pocket + .pocket {
-  transform: translateX(0);
+  margin-left: 10px;
+  transition: margin-left 0.44s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bank-row .pocket:hover,
 .bank-row .pocket:focus-within {
