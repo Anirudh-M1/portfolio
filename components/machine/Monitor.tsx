@@ -1,6 +1,7 @@
 import { DocBody } from "@/components/docs/DocBody";
 import type { useCarrierMachine } from "./useCarrierMachine";
 import "./machine.css";
+import "@/components/docs/docs-crt.css";
 
 export interface MonitorProps {
   machine: ReturnType<typeof useCarrierMachine>;
