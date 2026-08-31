@@ -518,31 +518,45 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
    * expressed as a transform away from there, so "arrived" is transform
    * identity — exactly the pose the seated drive already has. */
   const makeFlight = useCallback((d: DriveDoc, chipRect: DOMRect) => {
-    const card = document.querySelector<HTMLElement>(".card")!.getBoundingClientRect();
-    const slot = slotRect();
     const fly = document.getElementById("fly");
     const el = document.createElement("div");
     el.className = "flyx";
-    el.style.cssText = `left:${slot.left}px;top:${slot.top}px;width:${slot.width}px;height:${slot.height}px`;
     el.innerHTML = `<div class="flyy"><div class="flyh"><div class="m2">${gutsHTML(d, true)}</div></div></div>`;
     fly?.appendChild(el);
 
     const yEl = el.firstElementChild as HTMLElement;
     const hEl = yEl.firstElementChild as HTMLElement;
     const screw = hEl.querySelector<HTMLElement>(".screw")!;
-    // If .card hasn't been laid out yet, slot.width is 0 and this division
-    // is NaN — which the CSS parser silently voids, making the drive
-    // vanish with no transform at all. Guard the denominator explicitly.
-    const geo = {
-      dx: chipRect.left + chipRect.width / 2 - slot.cx,
-      dy: chipRect.top + chipRect.height / 2 - slot.cy,
-      s: slot.width > 0 ? chipRect.width / slot.width : 1,
-      pull: (PULL / 520) * card.width,
-    };
     const st = { u: 1, hinge: 0, pull: 1, screw: 0 };
     const ok = (n: number) => (Number.isFinite(n) ? n : 0);
 
     function paint() {
+      // Re-measured every frame, not cached once at flight start. The
+      // board is a live target — the levitation spring keeps bobbing it
+      // in response to scroll for the whole time a flight is in the air
+      // — so a slot sampled once at t=0 goes stale mid-flight and the
+      // drive arrives wherever the board *used to be* rather than where
+      // it actually settled. Re-reading slotRect()/`.card` here is what
+      // keeps the landing point (and the pre-insertion pull-back
+      // distance, which scales off the board's own width) locked to
+      // wherever the board really is on the frame the flight finishes,
+      // scroll included.
+      const slot = slotRect();
+      const card = document.querySelector<HTMLElement>(".card")!.getBoundingClientRect();
+      el.style.left = `${slot.left}px`;
+      el.style.top = `${slot.top}px`;
+      el.style.width = `${slot.width}px`;
+      el.style.height = `${slot.height}px`;
+      // If .card hasn't been laid out yet, slot.width is 0 and this
+      // division is NaN — which the CSS parser silently voids, making
+      // the drive vanish with no transform at all. Guard the
+      // denominator explicitly.
+      const geo = {
+        dx: chipRect.left + chipRect.width / 2 - slot.cx,
+        dy: chipRect.top + chipRect.height / 2 - slot.cy,
+        s: slot.width > 0 ? chipRect.width / slot.width : 1,
+        pull: (PULL / 520) * card.width,
+      };
       const u = st.u;
       const tx = ok((1 - u) * -geo.pull * st.pull + u * geo.dx);
       const ty = ok(u * geo.dy);
