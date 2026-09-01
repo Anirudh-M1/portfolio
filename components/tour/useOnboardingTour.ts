@@ -20,8 +20,10 @@ export interface TourUiState {
 
 /** Reads the CSS rect a step's spotlight should frame — falls back to
  * `.mon` if the target is missing or collapsed, rather than shrinking the
- * spotlight to a point somewhere off-screen. */
-function targetRect(selector: string, pad: number) {
+ * spotlight to a point somewhere off-screen. Padding is per-side rather
+ * than uniform: a tilted step needs asymmetric padding (see trackSpot),
+ * and reusing one function for both keeps targetRect itself simple. */
+function targetRect(selector: string, pad: { left: number; right: number; top: number; bottom: number }) {
   let el = document.querySelector<HTMLElement>(selector);
   let r = el?.getBoundingClientRect();
   if (!r || r.width < 4 || r.height < 4) {
@@ -29,7 +31,12 @@ function targetRect(selector: string, pad: number) {
     r = el?.getBoundingClientRect();
   }
   if (!r) return null;
-  return { left: r.left - pad, top: r.top - pad, width: r.width + pad * 2, height: r.height + pad * 2 };
+  return {
+    left: r.left - pad.left,
+    top: r.top - pad.top,
+    width: r.width + pad.left + pad.right,
+    height: r.height + pad.top + pad.bottom,
+  };
 }
 
 export function useOnboardingTour() {
@@ -95,18 +102,28 @@ export function useOnboardingTour() {
   const trackSpot = useCallback(() => {
     const s = TOUR_STEPS[stepIndexRef.current];
     if (s && onRef.current) {
-      // Tilted steps need extra padding beyond what an untilted one would:
-      // .spot's rotateY is applied to an already axis-aligned bounding
-      // rect (getBoundingClientRect() on a tilted element measures its
-      // upright bounding box, not its true rotated quad), so rotating that
-      // rect a second time shifts visual mass toward the side rotateY
-      // brings forward — this design's positive rotateY brings the LEFT
-      // edge forward (machine.css), so the RIGHT edge of the padded rect
-      // ends up short of the target's actual visual right edge. Padding
-      // symmetrically rather than only on the right is simpler and the
-      // extra room on the other three sides doesn't hurt.
-      const pad = (s.pad ?? 12) + (s.tilts ? 12 : 0);
-      const target = veiledRef.current || s.noHole ? null : targetRect(s.at, pad);
+      // Tilted steps need asymmetric padding, not just more of it: .spot's
+      // rotateY is applied to an already axis-aligned bounding rect
+      // (getBoundingClientRect() on a tilted element measures its upright
+      // bounding box, not its true rotated quad), so rotating that rect a
+      // second time shifts visual mass toward the side rotateY brings
+      // forward — this design's positive rotateY brings the LEFT edge
+      // forward (machine.css). Padding symmetrically just moves both
+      // edges out by the same amount without fixing that imbalance: the
+      // left ends up with far more spare room than it needs while the
+      // right is still barely covered. Shifting padding from left to
+      // right compensates for it directly instead.
+      const base = s.pad ?? 12;
+      const pad = s.tilts
+        ? { left: Math.max(0, base - 14), right: base + 20, top: base, bottom: base }
+        : { left: base, right: base, top: base, bottom: base };
+      // noHole (the tray step) hides the spotlight visually but must
+      // still resolve a real rect here — the click-blocking panes cut
+      // their hole from this same rect, and without one they'd cover the
+      // tray completely and swallow the very click the step is waiting
+      // on. Only `veiled` (mid-transition, nothing to frame yet) should
+      // null the target out.
+      const target = veiledRef.current ? null : targetRect(s.at, pad);
       const cur = spotCurRef.current;
       if (!target || !cur) {
         spotCurRef.current = target;
@@ -327,6 +344,10 @@ export function useOnboardingTour() {
     isLast: stepIndex >= TOUR_STEPS.length - 1,
     spot,
     tilts: !!TOUR_STEPS[stepIndex]?.tilts,
+    // Visual-only: spot still holds a real rect (so the click-blocking
+    // panes still cut a working hole over the target), this just tells
+    // OnboardingTour to render that hole's spotlight invisibly.
+    hideSpotlight: !!TOUR_STEPS[stepIndex]?.noHole,
     start: startTour,
     end: endTour,
     skip,

@@ -125,10 +125,15 @@ body.tour-on {
   white-space: nowrap;
 }
 .tutcard .scr {
+  /* No min-height: it was sized for the longest step's text (2-3 lines),
+   * so a one-sentence step reserved the same space anyway and left a big
+   * gap before .tutwait below it. Sizing to actual content means a short
+   * step's card is just shorter, which reads fine here since the card
+   * is position:fixed — its own height changing doesn't reflow anything
+   * else on the page. */
   padding: 16px 18px 6px;
   font-size: 12px;
   line-height: 1.7;
-  min-height: 104px;
   overflow-wrap: break-word;
 }
 .tutcard .scr .pfx {
@@ -259,9 +264,6 @@ body.tour-on {
     left: 12px;
     width: auto;
     max-width: none;
-  }
-  .tutcard .scr {
-    min-height: 76px;
   }
   .tutcard .tact {
     justify-content: stretch;

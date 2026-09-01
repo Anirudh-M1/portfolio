@@ -18,13 +18,21 @@ export function OnboardingTour({ tour }: OnboardingTourProps) {
     T = spot?.top ?? 0,
     W = spot?.width ?? 0,
     H = spot?.height ?? 0;
+  // Two different things: whether there's a real rect to cut the
+  // click-blocking panes' hole from (only false while veiled — a step
+  // whose target isn't ready to be framed yet), and whether the
+  // spotlight itself should be visible once there is one. A noHole step
+  // (the tray) has a perfectly good rect — its hole still needs to let
+  // clicks on the tray through — it just shouldn't render a visible box
+  // around it.
   const noHole = tour.veiled || !spot;
+  const spotOpacity = noHole || tour.hideSpotlight ? 0 : 1;
 
   return (
     <div className={`tut${tour.on ? " on" : ""}`} aria-live="polite">
       <div
         className={`spot${tour.tilts ? " tilt" : ""}`}
-        style={{ left: L, top: T, width: W, height: H, opacity: noHole ? 0 : 1 }}
+        style={{ left: L, top: T, width: W, height: H, opacity: spotOpacity }}
       >
         <b />
         <b />
