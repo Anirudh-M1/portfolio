@@ -1022,7 +1022,12 @@ a {
 .fly {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  /* Above the guided tour's dim/spotlight overlay (tour.css, up to 202)
+   * on purpose: a step active during a fly-in — "click any drive" is
+   * exactly this case — must not hide the drive behind the tour's dark
+   * blocking panes just because the spotlight itself is framing the
+   * tray or the CRT rather than tracking the flight in progress. */
+  z-index: 210;
   pointer-events: none;
   perspective: 3000px;
 }
