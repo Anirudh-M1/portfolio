@@ -8,7 +8,11 @@ export function EducationSection() {
         <span className="ln" />
       </div>
       <p className="co">{EDUCATION.school}</p>
-      <span className="slabel">{EDUCATION.program}</span>
+      <span className="slabel">
+        {EDUCATION.programLines[0]}
+        <br />
+        {EDUCATION.programLines[1]}
+      </span>
       <div className="job" style={{ marginTop: 6 }}>
         <span className="when">
           {EDUCATION.gpaLine}

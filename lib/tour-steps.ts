@@ -51,7 +51,7 @@ export interface TourStep {
 
 export const TOUR_STEPS: TourStep[] = [
   {
-    text: "This is the machine. Thirteen projects live on the drives in the tray below — pick one and it loads onto the board.",
+    text: "This is the machine. Thirteen projects live on the drives in the tray below: pick one and it loads onto the board.",
     at: ".mon",
     pad: 16,
     tilts: true,
@@ -64,7 +64,7 @@ export const TOUR_STEPS: TourStep[] = [
     waitMsg: "Click a drive in the tray",
   },
   {
-    text: "It boots right there on the screen, like an old terminal coming up — then the project's actual write-up.",
+    text: "It boots right there on the screen, like an old terminal coming up, then the project's actual write-up.",
     at: "#crt",
     pad: 12,
     veilUntil: "loaded",
