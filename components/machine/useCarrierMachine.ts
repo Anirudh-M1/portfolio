@@ -351,9 +351,15 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
     for (let k = 0; k < 3; k++) {
       const sag = 34 + k * 20,
         off = (k - 1) * 7;
+      // Start/end points are shared across all three (no `off`) so every
+      // wire actually plugs into the same tip at both connectors, the way
+      // a real bundled loom does — only the two control points still carry
+      // `off`, which is what keeps each wire's individual sag/droop
+      // reading as three distinct strands through the slack in between
+      // rather than one flat ribbon.
       const d =
-        `M${ax} ${ay + off} C${ax + run * 0.34} ${ay + sag + off} ` +
-        `${ax + run * 0.66} ${b.y + sag + off} ${b.x} ${b.y + off}`;
+        `M${ax} ${ay} C${ax + run * 0.34} ${ay + sag + off} ` +
+        `${ax + run * 0.66} ${b.y + sag + off} ${b.x} ${b.y}`;
       document.getElementById("c" + k)?.setAttribute("d", d);
       document.getElementById("k" + k)?.setAttribute("d", d);
       document.getElementById("s" + k)?.setAttribute("d", d);
