@@ -540,7 +540,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
   /* A drive in flight. Its box is parked on the slot and everything is
    * expressed as a transform away from there, so "arrived" is transform
    * identity — exactly the pose the seated drive already has. */
-  const makeFlight = useCallback((d: DriveDoc, chipRect: DOMRect) => {
+  const makeFlight = useCallback((d: DriveDoc, chipEl: HTMLElement) => {
     const fly = document.getElementById("fly");
     const el = document.createElement("div");
     el.className = "flyx";
@@ -554,18 +554,22 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
     const ok = (n: number) => (Number.isFinite(n) ? n : 0);
 
     function paint() {
-      // Re-measured every frame, not cached once at flight start. The
-      // board is a live target — the levitation spring keeps bobbing it
-      // in response to scroll for the whole time a flight is in the air
-      // — so a slot sampled once at t=0 goes stale mid-flight and the
-      // drive arrives wherever the board *used to be* rather than where
-      // it actually settled. Re-reading slotRect()/`.card` here is what
-      // keeps the landing point (and the pre-insertion pull-back
-      // distance, which scales off the board's own width) locked to
-      // wherever the board really is on the frame the flight finishes,
-      // scroll included.
+      // Both ends re-measured every frame, not cached once at flight
+      // start. Both the board and the tray are live targets — scrolling
+      // moves every normal-flow element's viewport rect, and the board
+      // additionally bobs with the levitation spring — for the whole
+      // time a flight is in the air. A rect sampled once at t=0 goes
+      // stale mid-flight: a chip position cached at the start is exactly
+      // as wrong for a return-to-tray flight as a slot cached at the
+      // start was for landing on the board (the earlier fix here only
+      // covered that second case). Re-reading slotRect()/`.card`/chipEl's
+      // own rect here is what keeps both the landing point and the
+      // pre-insertion pull-back distance (which scales off the board's
+      // own width) locked to where things really are on the frame the
+      // flight finishes, scroll included.
       const slot = slotRect();
       const card = document.querySelector<HTMLElement>(".card")!.getBoundingClientRect();
+      const chipRect = chipEl.getBoundingClientRect();
       el.style.left = `${slot.left}px`;
       el.style.top = `${slot.top}px`;
       el.style.width = `${slot.width}px`;
@@ -609,7 +613,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         return Promise.resolve();
       }
 
-      const F = makeFlight(d, chips[i]!.getBoundingClientRect());
+      const F = makeFlight(d, chips[i]!);
       const s = F.st;
       F.paint();
 
@@ -675,7 +679,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         return Promise.resolve();
       }
 
-      const F = makeFlight(d, chips[i]!.getBoundingClientRect());
+      const F = makeFlight(d, chips[i]!);
       const s = F.st;
       // hand off at rest, where the flier and the seated drive coincide
       s.u = 0;
