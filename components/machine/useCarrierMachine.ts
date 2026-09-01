@@ -790,11 +790,17 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
     setHash(location.pathname);
   }, [ejectDrive]);
 
-  /* Boot-on-mount: mirrors the source's own start() — the initial drive
-   * (from the URL hash, or README) is already "in the machine" the
-   * instant the stage reveals itself, so the screen is never dark. No
-   * flight animation plays for this one; insert()'s flight is only for
-   * drives loaded after the machine is already live.
+  /* Boot-on-mount: the initial drive (from the URL hash, or README) now
+   * actually flies in the same way any later load() does, rather than
+   * just being "in the machine" already the instant the stage reveals
+   * itself — insert() itself already no-ops the flight under reduced
+   * motion, so that case still lands instantly with no change.
+   *
+   * setBusy wraps it (not just insert()'s own internal state) because
+   * this call bypasses load() entirely — load() is what normally sets
+   * busy to keep the tray/PREV-NEXT disabled for the length of an
+   * animation, and without it here, a click during the ~2s the initial
+   * flight takes would start a second insert() overlapping the first.
    *
    * Also registers the tray's wheel-to-scroll behavior natively rather
    * than via React's onWheel: React's root listener registers wheel as
@@ -808,10 +814,15 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
 
     const i = fromHash();
     const rail = document.getElementById("rail");
-    const pockets = rail ? [...rail.querySelectorAll<HTMLElement>(".pocket")] : [];
-    pockets[i]?.classList.add("out");
-    mountState(i);
-    land(i);
+    // Removed here, imperatively, rather than left to the setReady(true)
+    // below: insert()'s first paint() call measures the tray chip and
+    // the board slot synchronously, in this same tick, and .stage was
+    // hidden up to this point — React's state update wouldn't reach the
+    // DOM until the next commit, well after that measurement already
+    // ran against a hidden (zero-size) element.
+    document.getElementById("stage")?.removeAttribute("hidden");
+    setBusy(true);
+    void insert(i).finally(() => setBusy(false));
     setReady(true);
 
     const onWheel = (e: WheelEvent) => {
@@ -856,7 +867,8 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
       ro?.disconnect();
       removeEventListener("hashchange", onHashChange);
     };
-    // Runs once on mount; mountState/land/clearTimers are stable via useCallback.
+    // Runs once on mount; insert/clearTimers are stable via useCallback and
+    // setBusy is a stable state setter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
