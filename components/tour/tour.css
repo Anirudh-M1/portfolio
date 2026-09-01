@@ -68,7 +68,12 @@
 /* ---------- callout card ---------- */
 .tutcard {
   position: fixed;
-  top: 26px;
+  /* Clear of both the nav bar's right-aligned links AND .helpbtn, which
+   * lives in this same corner at `top: calc(var(--bar) + 16px)` — lining
+   * the two up at the same offset put this card's header row directly
+   * behind the button, covering the "STEP n/total" text instead of just
+   * touching the card's edge. */
+  top: calc(var(--bar) + 60px);
   right: 26px;
   width: 372px;
   max-width: calc(100vw - 52px);
