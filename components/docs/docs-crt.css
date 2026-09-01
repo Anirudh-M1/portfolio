@@ -111,14 +111,6 @@
   margin-top: 1.15em;
   flex-wrap: wrap;
 }
-/* README-specific: the links live under the portrait (.porcol below)
- * rather than trailing the last paragraph, so they stack in the same
- * narrow column the portrait occupies instead of running in a row. */
-.crt .doc .porcol .links {
-  flex-direction: column;
-  gap: 0.55em;
-  margin-top: 0.9em;
-}
 .crt .doc a {
   color: var(--scr-link);
   text-decoration: none;
