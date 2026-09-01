@@ -1,0 +1,69 @@
+name: rollout
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rollout
+  cancel-in-progress: false
+
+jobs:
+  advance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rollout-source
+          fetch-depth: 0
+
+      - name: Advance main by one (occasionally two) commits, spread through waking hours
+        env:
+          END_EPOCH: "1788823506"
+        run: |
+          git config user.name "Anirudh-M1"
+          git config user.email "anirudhmoholkar@gmail.com"
+          git fetch origin main
+          git branch -f main origin/main
+
+          HOUR_UTC=$(date -u +%H); HOUR_UTC=$((10#$HOUR_UTC))
+          # 9am-11pm US Central (UTC-5) is 14:00-23:59 UTC plus 00:00-03:59 UTC the next day.
+          if [ "$HOUR_UTC" -lt 14 ] && [ "$HOUR_UTC" -ge 4 ]; then
+            echo "skip: outside waking hours (UTC hour=$HOUR_UTC)"; exit 0
+          fi
+
+          REMAINING=$(git rev-list --count main..rollout-source)
+          if [ "$REMAINING" -le 0 ]; then
+            echo "done: main is level with rollout-source"; exit 0
+          fi
+
+          NOW_EPOCH=$(date -u +%s)
+          REMAINING_SECONDS=$((END_EPOCH - NOW_EPOCH))
+          if [ "$REMAINING_SECONDS" -lt 0 ]; then REMAINING_SECONDS=0; fi
+          REMAINING_TICKS=$(( (REMAINING_SECONDS / 1800) * 14 / 24 + 1 ))
+
+          PY_OUT=$(python3 - "$REMAINING" "$REMAINING_TICKS" <<'PYEOF'
+          import random, sys
+          remaining = int(sys.argv[1]); ticks = max(int(sys.argv[2]), 1)
+          p = min(1.0, remaining / ticks)
+          do_push = random.random() < p
+          n = 1
+          if do_push and remaining > 1 and random.random() < 0.12:
+              n = 2
+          print(f"{int(do_push)} {n}")
+          PYEOF
+          )
+          DO_PUSH=$(echo "$PY_OUT" | cut -d' ' -f1)
+          N=$(echo "$PY_OUT" | cut -d' ' -f2)
+
+          if [ "$DO_PUSH" != "1" ]; then
+            echo "skip: coin flip missed (remaining=$REMAINING, remaining_ticks=$REMAINING_TICKS)"; exit 0
+          fi
+
+          TARGET=$(git rev-list --reverse main..rollout-source | sed -n "${N}p")
+          echo "pushing through $TARGET"
+          git push origin "${TARGET}:refs/heads/main"
