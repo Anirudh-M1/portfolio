@@ -40,6 +40,13 @@ export interface TourStep {
    * isn't part of the monitor (the tray, the top nav bar), which don't
    * tilt at all. */
   tilts?: boolean;
+  /** No spotlight hole at all for this step — dim, but nothing framed.
+   * Used for the tray step: highlighting the whole rail was redundant
+   * once the spotlight itself already goes dark during a load (the
+   * veilUntil steps), so the tray doesn't need its own separate
+   * "look here" treatment on top of that. The text and the wait-for-a-
+   * click gating are unaffected — this only turns off the hole. */
+  noHole?: boolean;
 }
 
 export const TOUR_STEPS: TourStep[] = [
@@ -55,6 +62,7 @@ export const TOUR_STEPS: TourStep[] = [
     pad: 10,
     wait: "chip",
     waitMsg: "Click a drive in the tray",
+    noHole: true,
   },
   {
     text: "It boots right there on the screen, like an old terminal coming up — then the project's actual write-up.",

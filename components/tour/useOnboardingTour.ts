@@ -95,7 +95,18 @@ export function useOnboardingTour() {
   const trackSpot = useCallback(() => {
     const s = TOUR_STEPS[stepIndexRef.current];
     if (s && onRef.current) {
-      const target = veiledRef.current ? null : targetRect(s.at, s.pad ?? 12);
+      // Tilted steps need extra padding beyond what an untilted one would:
+      // .spot's rotateY is applied to an already axis-aligned bounding
+      // rect (getBoundingClientRect() on a tilted element measures its
+      // upright bounding box, not its true rotated quad), so rotating that
+      // rect a second time shifts visual mass toward the side rotateY
+      // brings forward — this design's positive rotateY brings the LEFT
+      // edge forward (machine.css), so the RIGHT edge of the padded rect
+      // ends up short of the target's actual visual right edge. Padding
+      // symmetrically rather than only on the right is simpler and the
+      // extra room on the other three sides doesn't hurt.
+      const pad = (s.pad ?? 12) + (s.tilts ? 12 : 0);
+      const target = veiledRef.current || s.noHole ? null : targetRect(s.at, pad);
       const cur = spotCurRef.current;
       if (!target || !cur) {
         spotCurRef.current = target;
