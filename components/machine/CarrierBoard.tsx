@@ -20,7 +20,7 @@ export function CarrierBoard({ machine }: CarrierBoardProps) {
         <span className="t">Carrier</span>
         <span className="ln" />
         <span className="st" id="status">
-          —
+          N/A
         </span>
       </div>
       <div className="card">

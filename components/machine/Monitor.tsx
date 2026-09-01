@@ -50,7 +50,7 @@ export function Monitor({ machine }: MonitorProps) {
           </div>
           <div className="statusline">
             <span id="stMount" aria-hidden="true">
-              —
+              N/A
             </span>
             <span id="stPart" aria-hidden="true" />
             <span id="stLink" aria-hidden="true">

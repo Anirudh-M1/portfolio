@@ -146,11 +146,11 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
     };
     if (d) {
       set("stMount", d.mount);
-      set("stPart", d.cap && d.cap !== "—" ? `${d.part} · ${d.cap}` : d.part);
+      set("stPart", d.cap && d.cap !== "N/A" ? `${d.part} · ${d.cap}` : d.part);
       set("stLink", "PCIe 4.0 x4");
       bar.classList.add("live");
     } else {
-      set("stMount", "—");
+      set("stMount", "N/A");
       set("stPart", "");
       set("stLink", "NO LINK");
       bar.classList.remove("live");
@@ -656,7 +656,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
       setLoadedIndex(null);
       chips[i]?.setAttribute("aria-current", "false");
       const status = document.getElementById("status");
-      if (status) status.textContent = "—";
+      if (status) status.textContent = "N/A";
       // Keeps this pocket's bank un-shingled for the length of the return
       // flight specifically (removed alongside "out" below/at the end of
       // the timeline), regardless of where the mouse actually is — see
