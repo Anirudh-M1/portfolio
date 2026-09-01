@@ -267,6 +267,15 @@ export function useOnboardingTour() {
     // offer once both of those are turned off — there's no reduced-
     // motion variant of this feature to fall back to, only skipping it.
     if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    // Same story for the .docs fallback breakpoint (site.css) — below
+    // this size there's no .mon/.rail/#crt/.stnav to point at at all
+    // (the whole .stage is display:none), so every step's target would
+    // resolve to nothing and the dim overlay would just sit there,
+    // fully blocking the one thing actually shown (.docs) with no
+    // spotlight ever appearing. Same media query as site.css's, kept in
+    // sync by using the identical string rather than a separately
+    // maintained width/height check.
+    if (typeof window !== "undefined" && window.matchMedia?.("(max-width: 960px), (max-height: 600px)").matches) return;
     // The tour's steps all target parts of the interactive stage (.mon,
     // .rail, #crt...) which only sit where the spotlight math expects
     // them when the page is scrolled to the top — replaying via the "?"
