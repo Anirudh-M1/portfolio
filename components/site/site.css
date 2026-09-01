@@ -29,14 +29,3 @@ body.js .docs {
     scroll-behavior: auto;
   }
 }
-/* Reported: on a 14" MacBook Pro, the page looks better at 90% browser
- * zoom than at 100% — everything reads a bit large. Rather than scope
- * that to a laptop-width range, applied everywhere: it's a size
- * preference for the design as a whole, not a laptop-specific fix.
- * zoom rather than transform: scale specifically — a scale transform
- * on a wrapper creates a new containing block for position:fixed
- * descendants, which would trap the tour overlay and the help button
- * inside that wrapper's box instead of the real viewport. */
-body {
-  zoom: 0.9;
-}
