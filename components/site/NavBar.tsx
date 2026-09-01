@@ -14,7 +14,7 @@ export function NavBar() {
   return (
     <header className="bar">
       <span className="who">Anirudh Moholkar</span>
-      <span className="role">Distributed systems &amp; backend infrastructure</span>
+      <span className="role">Software engineer, systems and product</span>
       <nav>
         {LINKS.map((l) => (
           <a key={l.label} href={l.href}>
