@@ -19,7 +19,7 @@ function ReadmeBody({ doc }: { doc: ReadmeDoc }) {
         {doc.heading[1]} <span className="sub" dangerouslySetInnerHTML={{ __html: doc.sub }} />
       </h1>
       <span className="por">
-        <Image src={doc.portrait.src} alt={doc.portrait.alt} fill sizes="300px" />
+        <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${doc.portrait.src}`} alt={doc.portrait.alt} fill sizes="300px" />
       </span>
       <p className="lede" dangerouslySetInnerHTML={{ __html: doc.lede }} />
       {doc.paragraphs.map((p, i) => (

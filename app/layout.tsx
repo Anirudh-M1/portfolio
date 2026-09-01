@@ -32,7 +32,13 @@ export const viewport: Viewport = {
   themeColor: "#04110F",
 };
 
+// So the og:image/twitter:image meta tags resolve to the real deployed
+// URL instead of Next's localhost:3000 fallback — matters once this is
+// actually a link that gets pasted places.
+const SITE_URL = process.env.GITHUB_PAGES === "true" ? "https://anirudh-m1.github.io/portfolio" : undefined;
+
 export const metadata: Metadata = {
+  ...(SITE_URL && { metadataBase: new URL(SITE_URL) }),
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
