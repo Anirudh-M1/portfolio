@@ -22,8 +22,8 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const TITLE = "Anirudh Moholkar — Systems & Backend Infrastructure";
-const DESCRIPTION = "Anirudh Moholkar. Computer Engineering at UIUC. Distributed systems and backend infrastructure.";
+const TITLE = "Anirudh Moholkar: Software Engineer, Systems and Product";
+const DESCRIPTION = "Anirudh Moholkar. Computer Engineering at UIUC. Software engineer, systems and product.";
 
 export const viewport: Viewport = {
   // Matches the new design's --void background token (machine.css),
@@ -33,9 +33,12 @@ export const viewport: Viewport = {
 };
 
 // So the og:image/twitter:image meta tags resolve to the real deployed
-// URL instead of Next's localhost:3000 fallback — matters once this is
-// actually a link that gets pasted places.
-const SITE_URL = process.env.GITHUB_PAGES === "true" ? "https://anirudh-m1.github.io/portfolio" : undefined;
+// URL instead of Next's localhost:3000 fallback. Origin only, no
+// /portfolio suffix: next.config.ts's basePath already prefixes the
+// auto-detected opengraph-image/icon route URLs with /portfolio before
+// Metadata resolves them against this base, so including it here too
+// doubled the path (…/portfolio/portfolio/opengraph-image).
+const SITE_URL = process.env.GITHUB_PAGES === "true" ? "https://anirudh-m1.github.io" : undefined;
 
 export const metadata: Metadata = {
   ...(SITE_URL && { metadataBase: new URL(SITE_URL) }),
