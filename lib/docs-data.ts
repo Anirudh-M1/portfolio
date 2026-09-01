@@ -32,9 +32,10 @@ interface DriveDocBase {
 
 export interface ReadmeDoc extends DriveDocBase {
   kind: "readme";
-  /** Two-line display name for the h1 ("Anirudh" / "Moholkar"), rendered
-   * with a hard <br> between them as in the source — distinct from the
-   * drive's own `name` ("README"). */
+  /** First/last name for the h1 ("Anirudh" / "Moholkar"), rendered on one
+   * line joined by a space — distinct from the drive's own `name`
+   * ("README"). Kept as two parts rather than one string in case the
+   * layout ever needs to style or wrap them differently again. */
   heading: [string, string];
   sub: string;
   portrait: { src: string; alt: string };

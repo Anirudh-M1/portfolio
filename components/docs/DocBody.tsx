@@ -14,9 +14,7 @@ function ReadmeBody({ doc }: { doc: ReadmeDoc }) {
   return (
     <>
       <h1>
-        {doc.heading[0]}
-        <br />
-        {doc.heading[1]} <span className="sub" dangerouslySetInnerHTML={{ __html: doc.sub }} />
+        {doc.heading[0]} {doc.heading[1]} <span className="sub" dangerouslySetInnerHTML={{ __html: doc.sub }} />
       </h1>
       <div className="porcol">
         <span className="por">

@@ -44,7 +44,7 @@
 .docs h1 .sub {
   display: block;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.26em;
+  font-size: 0.30em;
   font-weight: 400;
   letter-spacing: 0.2em;
   color: var(--dim);
