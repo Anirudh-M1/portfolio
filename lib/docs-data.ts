@@ -216,14 +216,15 @@ export const DOCS: DriveDoc[] = [
     cap: "—",
     mount: "/home",
     heading: ["Anirudh", "Moholkar"],
-    sub: "Distributed systems &amp; backend infrastructure",
+    sub: "Software engineer, systems and product",
     portrait: { src: "/portrait.jpg", alt: "Anirudh Moholkar" },
     lede:
-      "Computer Engineering at the University of Illinois Urbana-Champaign, graduating <b>May 2027</b>. Dean's List, James Scholar, Fiddler Innovation Award, <b>3.79</b> GPA.",
+      "BS Computer Engineering, University of Illinois Urbana-Champaign, <b>May 2027</b><br />MS Computer Science, University of Illinois Urbana-Champaign, <b>May 2028</b>",
     paragraphs: [
-      "Two consecutive engineering internships at <b>Zebra Technologies</b> — Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Both shipped to production. The 2025 automation work was commended directly by Zebra's CIO.",
-      "I build systems that hold up when something fails: fault-tolerant distributed storage, stream processing, kernels, and lately agentic AI over enterprise data. I care most about owning a problem end to end — finding it in the metrics, designing the fix, and being accountable for what it actually saved.",
-      "Thirteen drives are in the tray below. Pick one and it loads.",
+      "Dean's List, James Scholar, Fiddler Innovation Award, <b>3.79</b> GPA.",
+      "Two consecutive engineering internships at <b>Zebra Technologies</b>: Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Both shipped to production, with work commended directly by Zebra's CIO.",
+      "I build systems that hold up when something fails. That's meant fault-tolerant storage across distributed nodes, stream processing under load, work down at the kernel level, and lately agentic AI over enterprise data. What I care about most is owning a problem end to end: finding it in the metrics, designing the fix, and being accountable for what it actually saved.",
+      "There are thirteen drives in the tray below, each going deeper into my projects. Pick one and it'll load up.",
     ],
     links: [
       { label: "GitHub", href: "https://github.com/Anirudh-M1" },
