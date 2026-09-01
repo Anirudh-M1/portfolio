@@ -62,7 +62,6 @@ export const TOUR_STEPS: TourStep[] = [
     pad: 10,
     wait: "chip",
     waitMsg: "Click a drive in the tray",
-    noHole: true,
   },
   {
     text: "It boots right there on the screen, like an old terminal coming up — then the project's actual write-up.",

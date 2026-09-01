@@ -1040,12 +1040,13 @@ a {
 .fly {
   position: fixed;
   inset: 0;
-  /* Above the guided tour's dim/spotlight overlay (tour.css, up to 202)
-   * on purpose: a step active during a fly-in — "click any drive" is
-   * exactly this case — must not hide the drive behind the tour's dark
-   * blocking panes just because the spotlight itself is framing the
-   * tray or the CRT rather than tracking the flight in progress. */
-  z-index: 210;
+  /* Below the guided tour's dim overlay (tour.css) on purpose: a flying
+   * drive should go dark along with everything else while the tour has
+   * the screen dimmed, not stay bright and stand out against it — a
+   * prior version of this rule put .fly above the overlay specifically
+   * so the drive stayed visible there, which turned out to be the wrong
+   * call. */
+  z-index: 50;
   pointer-events: none;
   perspective: 3000px;
 }
