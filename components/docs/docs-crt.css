@@ -111,6 +111,14 @@
   margin-top: 1.15em;
   flex-wrap: wrap;
 }
+/* README-specific: the links live under the portrait (.porcol below)
+ * rather than trailing the last paragraph, so they stack in the same
+ * narrow column the portrait occupies instead of running in a row. */
+.crt .doc .porcol .links {
+  flex-direction: column;
+  gap: 0.55em;
+  margin-top: 0.9em;
+}
 .crt .doc a {
   color: var(--scr-link);
   text-decoration: none;
@@ -136,13 +144,21 @@
    percentages or the 1px insets wrong and the brackets either vanish or
    smear into a solid border, and it's the kind of regression that's easy
    to miss without isolating the diff. */
-.crt .doc .por {
+/* Positioning (and the links stacked under the portrait) lives on this
+ * wrapper now, not .por itself — .por only needs to fill it. */
+.crt .doc .porcol {
   position: absolute;
   right: 2.5%;
-  top: 26%;
+  top: 14%;
   /* Sized from the space the 62ch text column actually leaves, not a raw
      percentage — that overlapped the copy on narrower panels. */
   width: clamp(150px, calc(100% - 66ch), 300px);
+  display: flex;
+  flex-direction: column;
+}
+.crt .doc .por {
+  position: relative;
+  width: 100%;
   aspect-ratio: 1;
   border-radius: 3px;
   display: block;

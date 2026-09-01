@@ -18,20 +18,22 @@ function ReadmeBody({ doc }: { doc: ReadmeDoc }) {
         <br />
         {doc.heading[1]} <span className="sub" dangerouslySetInnerHTML={{ __html: doc.sub }} />
       </h1>
-      <span className="por">
-        <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${doc.portrait.src}`} alt={doc.portrait.alt} fill sizes="300px" />
-      </span>
+      <div className="porcol">
+        <span className="por">
+          <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${doc.portrait.src}`} alt={doc.portrait.alt} fill sizes="300px" />
+        </span>
+        <div className="links">
+          {doc.links.map((link) => (
+            <a key={link.href} href={link.href}>
+              {link.label}
+            </a>
+          ))}
+        </div>
+      </div>
       <p className="lede" dangerouslySetInnerHTML={{ __html: doc.lede }} />
       {doc.paragraphs.map((p, i) => (
         <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
       ))}
-      <div className="links">
-        {doc.links.map((link) => (
-          <a key={link.href} href={link.href}>
-            {link.label}
-          </a>
-        ))}
-      </div>
     </>
   );
 }
