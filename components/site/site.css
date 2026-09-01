@@ -29,3 +29,18 @@ body.js .docs {
     scroll-behavior: auto;
   }
 }
+/* Reported: on a 14" MacBook Pro (1512x982 at its default scaled
+ * resolution), the page looks better at 90% browser zoom than at 100%
+ * — everything reads a bit large for that panel size. zoom (not
+ * transform: scale, which would trap position:fixed descendants like
+ * the tour overlay and the help button inside a new containing block)
+ * mimics that same 90% zoom automatically, scoped to roughly the
+ * laptop-panel width range: above the point .docs takes over
+ * (960px) and below where a normal desktop monitor starts (1920px,
+ * so this doesn't also shrink the site on external displays that
+ * didn't have the problem being reported here). */
+@media (min-width: 961px) and (max-width: 1800px) {
+  body {
+    zoom: 0.9;
+  }
+}
