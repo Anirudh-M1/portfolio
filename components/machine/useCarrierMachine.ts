@@ -346,20 +346,28 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
     const ax = geoRef.current.ax + floatRef.current.ox,
       ay = geoRef.current.ay + floatRef.current.oy;
     const b = boardAnchor();
-    const run = b.x - ax;
+    // Bundled tips (previous fix) still let all three curves start
+    // fanning out — via the control points — from the very first pixel
+    // past the connector, which at this stroke width still read as three
+    // separate wires rather than one. Real strain relief keeps a cable
+    // running straight for a bit before it's free to sag; approximated
+    // here with a short straight run (LEAD, roughly the boot rect's own
+    // length in machine.css's .conn) before the curve starts, drawn as an
+    // `L` segment all three wires share exactly — the connector's own
+    // boot geometry sits right over it, so it reads as the wire leaving
+    // the boot's tip already bundled, then curving.
+    const LEAD = 16;
+    const wx0 = ax + LEAD,
+      wx1 = b.x - LEAD;
+    const run = wx1 - wx0;
 
     for (let k = 0; k < 3; k++) {
       const sag = 34 + k * 20,
         off = (k - 1) * 7;
-      // Start/end points are shared across all three (no `off`) so every
-      // wire actually plugs into the same tip at both connectors, the way
-      // a real bundled loom does — only the two control points still carry
-      // `off`, which is what keeps each wire's individual sag/droop
-      // reading as three distinct strands through the slack in between
-      // rather than one flat ribbon.
       const d =
-        `M${ax} ${ay} C${ax + run * 0.34} ${ay + sag + off} ` +
-        `${ax + run * 0.66} ${b.y + sag + off} ${b.x} ${b.y}`;
+        `M${ax} ${ay} L${wx0} ${ay} ` +
+        `C${wx0 + run * 0.34} ${ay + sag + off} ${wx0 + run * 0.66} ${b.y + sag + off} ${wx1} ${b.y} ` +
+        `L${b.x} ${b.y}`;
       document.getElementById("c" + k)?.setAttribute("d", d);
       document.getElementById("k" + k)?.setAttribute("d", d);
       document.getElementById("s" + k)?.setAttribute("d", d);
@@ -649,6 +657,11 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
       chips[i]?.setAttribute("aria-current", "false");
       const status = document.getElementById("status");
       if (status) status.textContent = "—";
+      // Keeps this pocket's bank un-shingled for the length of the return
+      // flight specifically (removed alongside "out" below/at the end of
+      // the timeline), regardless of where the mouse actually is — see
+      // the .returning rules in machine.css.
+      pockets[i]?.classList.add("returning");
 
       if (reduced) {
         ledOff();
@@ -657,7 +670,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
           (seated as HTMLElement).hidden = true;
           seated.innerHTML = "";
         }
-        pockets[i]?.classList.remove("out");
+        pockets[i]?.classList.remove("out", "returning");
         if (!opts?.silent) idle();
         return Promise.resolve();
       }
@@ -695,7 +708,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         );
       }).then(() => {
         F.remove();
-        pockets[i]?.classList.remove("out");
+        pockets[i]?.classList.remove("out", "returning");
       });
     },
     [idle, ledOff, makeFlight],

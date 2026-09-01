@@ -681,8 +681,21 @@ a {
   margin-left: calc(-1 * var(--shingle, 118px));
   transition: margin-left 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
 }
+/* A third way to force this open, alongside hover/focus-within: while a
+ * pocket's drive is actually mid-flight back to it (useCarrierMachine's
+ * ejectDrive adds .returning right when the eject starts, removes it
+ * once the drive is fully seated back in the tray), its bank stays
+ * un-shingled regardless of where the mouse actually is — clicking a
+ * drive in a *different* bank moves the mouse away from this one, and
+ * without this it would collapse immediately, well before the outgoing
+ * drive has visually landed. Scoped to .returning specifically rather
+ * than the broader, much-longer-lived .out (true for the whole time a
+ * drive sits loaded elsewhere) — this is only meant to bridge the ~3s
+ * return flight, not keep a bank permanently spread open just because
+ * its drive is the one currently on the board. */
 .bank:hover .bank-row .pocket + .pocket,
-.bank:focus-within .bank-row .pocket + .pocket {
+.bank:focus-within .bank-row .pocket + .pocket,
+.bank:has(.pocket.returning) .bank-row .pocket + .pocket {
   margin-left: 10px;
   transition: margin-left 0.44s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -721,7 +734,7 @@ a {
   will-change: opacity;
   transition: opacity 0.44s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.bank:not(:hover):not(:focus-within) .bank-row .pocket:not(:last-child) .spine {
+.bank:not(:hover):not(:focus-within):not(:has(.pocket.returning)) .bank-row .pocket:not(:last-child) .spine {
   opacity: 1;
 }
 .spine .sn {
