@@ -35,6 +35,11 @@
   --scr-link: #9bd2e6;
   --bar: 52px;
   --trayh: 200px;
+  /* .mon's own resting tilt, factored out so the guided tour's spotlight
+   * can apply the identical transform to itself for steps that frame
+   * something inside the monitor (tour.css) — one number to keep the two
+   * in sync rather than a second hardcoded copy. */
+  --mon-tilt: perspective(2600px) rotateX(2.5deg) rotateY(9deg);
 }
 * {
   box-sizing: border-box;
@@ -110,7 +115,7 @@ a {
   z-index: 2;
   justify-self: start;
   width: 100%;
-  transform: perspective(2600px) rotateX(2.5deg) rotateY(9deg);
+  transform: var(--mon-tilt);
   will-change: transform;
   transform-origin: 30% 46%;
 }

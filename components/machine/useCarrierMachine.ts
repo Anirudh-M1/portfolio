@@ -93,12 +93,15 @@ function setHash(h: string) {
   }
 }
 
-/** Names the onboarding tour's two gesture-gated steps care about: a
- * drive loaded via a tray chip, versus one loaded via PREV/NEXT. Kept as
- * a param rather than an import from the tour so this hook has no
- * dependency on the tour existing at all — Machine can be used (and was,
- * for several commits) with no tour mounted. */
-export type TourSignalName = "chip" | "nav";
+/** Names the onboarding tour's gesture-gated steps care about: a drive
+ * loaded via a tray chip, one loaded via PREV/NEXT, or one that's
+ * finished seating and started its boot sequence. Kept as a param
+ * rather than an import from the tour so this hook has no dependency on
+ * the tour existing at all — Machine can be used (and was, for several
+ * commits) with no tour mounted. Must stay in sync with tour-steps.ts's
+ * TourWaitKind by hand for the same reason — there's no single shared
+ * type to enforce it structurally. */
+export type TourSignalName = "chip" | "nav" | "loaded";
 
 export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
   const crtRef = useRef<HTMLDivElement>(null);
@@ -254,10 +257,16 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
       if (status) status.textContent = DOCS[i].mount;
       setStatusline(DOCS[i]);
       ledOn(i);
+      // Fires every time a drive finishes seating, tour or not — signal()
+      // no-ops unless the current step is actually waiting on "loaded"
+      // (only the #crt step is), so this is a no-op outside that one
+      // window. Ahead of boot() itself: the tour's spotlight should
+      // reveal onto #crt right as it starts typing, not after.
+      tourSignal?.("loaded");
       boot(DOCS[i]);
       setHash("#" + DOCS[i].id);
     },
-    [boot, ledOn, setStatusline],
+    [boot, ledOn, setStatusline, tourSignal],
   );
 
   /* Board tilt drives at 60fps during a flight, so it's a plain mutable

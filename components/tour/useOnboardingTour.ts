@@ -57,6 +57,15 @@ export function useOnboardingTour() {
   const stepIndexRef = useRef(0);
   const onRef = useRef(false);
   const veiledRef = useRef(false);
+  // Current *displayed* spotlight rect, eased toward the live target each
+  // frame rather than snapped to it — see trackSpot.
+  const spotCurRef = useRef<TourUiState["spot"]>(null);
+  // Signals that fired before the step waiting on them (via veilUntil)
+  // had actually been entered yet — reduced motion collapses a whole
+  // load() to effectively zero delay, so "loaded" can arrive well before
+  // the fixed 420ms "chip" advance lands on the step that wants it. Without
+  // this, that step would start veiled and never find out it can reveal.
+  const preFiredRef = useRef<Set<TourWaitKind>>(new Set());
 
   useEffect(() => {
     stepIndexRef.current = stepIndex;
@@ -71,11 +80,37 @@ export function useOnboardingTour() {
   /* The spotlight follows its target every frame rather than measuring
    * once — targets can move under scroll/resize/layout shifts, and a
    * one-shot measurement would drift out of sync with what it's supposed
-   * to be framing. */
+   * to be framing.
+   *
+   * The displayed rect eases toward that live target (a fixed fraction of
+   * the remaining distance per frame) instead of snapping straight to it.
+   * A step's target can itself be gently moving on every frame — anything
+   * inside .mon rides its idle levitation spring even at rest — so a
+   * plain snap-to-target reads as jitter (CSS `transition` doesn't help
+   * here either: retargeting a transition every frame off a moving value
+   * just restarts it every frame, which is its own kind of choppy). The
+   * same lerp also carries a step-to-step jump (a real target change, not
+   * jitter) smoothly from the old rect to the new one for free, and
+   * converges fast enough to read as quick rather than sluggish. */
   const trackSpot = useCallback(() => {
     const s = TOUR_STEPS[stepIndexRef.current];
     if (s && onRef.current) {
-      setSpot(veiledRef.current ? null : targetRect(s.at, s.pad ?? 12));
+      const target = veiledRef.current ? null : targetRect(s.at, s.pad ?? 12);
+      const cur = spotCurRef.current;
+      if (!target || !cur) {
+        spotCurRef.current = target;
+        setSpot(target);
+      } else {
+        const EASE = 0.3;
+        const next = {
+          left: cur.left + (target.left - cur.left) * EASE,
+          top: cur.top + (target.top - cur.top) * EASE,
+          width: cur.width + (target.width - cur.width) * EASE,
+          height: cur.height + (target.height - cur.height) * EASE,
+        };
+        spotCurRef.current = next;
+        setSpot(next);
+      }
     }
     trackRafRef.current = requestAnimationFrame(trackSpot);
   }, []);
@@ -109,6 +144,14 @@ export function useOnboardingTour() {
       const s = TOUR_STEPS[i];
       setWaitMsg(null);
       setNextEnabled(false);
+      // A step with veilUntil starts dimmed with no hole at all, revealed
+      // later by signal() once the thing it's waiting on actually
+      // happens — unless that signal already fired early (see
+      // preFiredRef), in which case there's nothing left to wait for.
+      // Everything else shows its hole immediately, same as before.
+      const alreadyFired = !!s.veilUntil && preFiredRef.current.has(s.veilUntil);
+      if (s.veilUntil) preFiredRef.current.delete(s.veilUntil);
+      setVeiled(!!s.veilUntil && !alreadyFired);
       typeText(s.text, () => {
         if (s.wait) setWaitMsg(s.waitMsg ?? "");
         setNextEnabled(true);
@@ -162,6 +205,8 @@ export function useOnboardingTour() {
     setOn(true);
     setVeiled(false);
     setStepIndex(0);
+    spotCurRef.current = null;
+    preFiredRef.current.clear();
     if (trackRafRef.current !== null) cancelAnimationFrame(trackRafRef.current);
     trackRafRef.current = requestAnimationFrame(trackSpot);
     renderStep(0);
@@ -176,7 +221,19 @@ export function useOnboardingTour() {
   const signal = useCallback((name: TourWaitKind) => {
     if (!onRef.current) return;
     const s = TOUR_STEPS[stepIndexRef.current];
-    if (s && s.wait === name) setTimeout(() => stepNext(), 420);
+    if (!s) return;
+    if (s.wait === name) setTimeout(() => stepNext(), 420);
+    // Independent of the above: a step can be showing (typing its text,
+    // even already advanced past by wait) while still veiled, waiting on
+    // a *different* signal to reveal its hole — currently only "loaded",
+    // fired once a clicked drive actually finishes seating.
+    if (s.veilUntil === name) {
+      setVeiled(false);
+    } else if (name === "loaded") {
+      // The waiting step hasn't been entered yet (see preFiredRef) —
+      // remember it instead of dropping it on the floor.
+      preFiredRef.current.add(name);
+    }
   }, [stepNext]);
 
   const skip = useCallback(() => {
@@ -224,6 +281,22 @@ export function useOnboardingTour() {
     return () => removeEventListener("keydown", onKeyDown);
   }, [on, endTour]);
 
+  /* Scroll also drives the monitor's own levitation spring
+   * (useCarrierMachine's floatStep), which isn't an interaction worth
+   * having mid-tour — locked for as long as the tour is on screen. Both
+   * html and body get the class: whichever one the browser treats as the
+   * actual scrolling element varies, so overflow:hidden has to be on both
+   * to reliably block scroll everywhere. */
+  useEffect(() => {
+    if (!on) return;
+    document.documentElement.classList.add("tour-on");
+    document.body.classList.add("tour-on");
+    return () => {
+      document.documentElement.classList.remove("tour-on");
+      document.body.classList.remove("tour-on");
+    };
+  }, [on]);
+
   useEffect(
     () => () => {
       if (typerRef.current !== null) clearInterval(typerRef.current);
@@ -242,6 +315,7 @@ export function useOnboardingTour() {
     nextEnabled,
     isLast: stepIndex >= TOUR_STEPS.length - 1,
     spot,
+    tilts: !!TOUR_STEPS[stepIndex]?.tilts,
     start: startTour,
     end: endTour,
     skip,

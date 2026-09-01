@@ -12,7 +12,7 @@
 // exist before the machine/tour DOM does — useOnboardingTour resolves
 // `at` against the current document each time it needs the target rect.
 
-export type TourWaitKind = "chip" | "nav";
+export type TourWaitKind = "chip" | "nav" | "loaded";
 
 export interface TourStep {
   text: string;
@@ -24,6 +24,22 @@ export interface TourStep {
   wait?: TourWaitKind;
   waitMsg?: string;
   last?: boolean;
+  /** Step renders veiled (full dim, no spotlight hole) until this signal
+   * fires, instead of showing the hole the instant the step becomes
+   * active. Distinct from `wait`: `wait` gates *advancing past* a step;
+   * this gates the *reveal* of a step already showing — for the "it
+   * boots right there" step specifically, whose target (#crt) sits
+   * behind a fly-in/eject-and-insert sequence that takes far longer than
+   * the fixed delay `signal()` advances steps on, so the hole would
+   * otherwise land on the CRT well before anything is actually on it. */
+  veilUntil?: TourWaitKind;
+  /** True if `at` resolves to something inside .mon — those steps apply
+   * .mon's own resting tilt (--mon-tilt) to the spotlight box so it
+   * reads as flush against the monitor's tilted plane rather than a flat
+   * rectangle floating in front of it. Left off for steps whose target
+   * isn't part of the monitor (the tray, the top nav bar), which don't
+   * tilt at all. */
+  tilts?: boolean;
 }
 
 export const TOUR_STEPS: TourStep[] = [
@@ -31,6 +47,7 @@ export const TOUR_STEPS: TourStep[] = [
     text: "This is the machine. Thirteen projects live on the drives in the tray below — pick one and it loads onto the board.",
     at: ".mon",
     pad: 16,
+    tilts: true,
   },
   {
     text: "Try it: click any drive in the tray.",
@@ -43,6 +60,8 @@ export const TOUR_STEPS: TourStep[] = [
     text: "It boots right there on the screen, like an old terminal coming up — then the project's actual write-up.",
     at: "#crt",
     pad: 12,
+    veilUntil: "loaded",
+    tilts: true,
   },
   {
     text: "Step through the rest without touching the tray at all.",
@@ -50,6 +69,7 @@ export const TOUR_STEPS: TourStep[] = [
     pad: 10,
     wait: "nav",
     waitMsg: "Click PREV or NEXT",
+    tilts: true,
   },
   {
     text: "Experience, Education and Contact are up here the whole time, whatever's loaded on the screen.",
@@ -61,5 +81,6 @@ export const TOUR_STEPS: TourStep[] = [
     at: ".mon",
     pad: 16,
     last: true,
+    tilts: true,
   },
 ];

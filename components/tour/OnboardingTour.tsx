@@ -22,7 +22,10 @@ export function OnboardingTour({ tour }: OnboardingTourProps) {
 
   return (
     <div className={`tut${tour.on ? " on" : ""}`} aria-live="polite">
-      <div className="spot" style={{ left: L, top: T, width: W, height: H, opacity: noHole ? 0 : 1 }}>
+      <div
+        className={`spot${tour.tilts ? " tilt" : ""}`}
+        style={{ left: L, top: T, width: W, height: H, opacity: noHole ? 0 : 1 }}
+      >
         <b />
         <b />
         <b />
