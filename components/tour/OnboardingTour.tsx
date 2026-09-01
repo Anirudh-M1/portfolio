@@ -17,7 +17,9 @@ export function OnboardingTour({ tour }: OnboardingTourProps) {
   const L = spot?.left ?? 0,
     T = spot?.top ?? 0,
     W = spot?.width ?? 0,
-    H = spot?.height ?? 0;
+    H = spot?.height ?? 0,
+    OX = spot?.ox ?? 50,
+    OY = spot?.oy ?? 50;
   // Two different things: whether there's a real rect to cut the
   // click-blocking panes' hole from (only false while veiled — a step
   // whose target isn't ready to be framed yet), and whether the
@@ -32,7 +34,7 @@ export function OnboardingTour({ tour }: OnboardingTourProps) {
     <div className={`tut${tour.on ? " on" : ""}`} aria-live="polite">
       <div
         className={`spot${tour.tilts ? " tilt" : ""}`}
-        style={{ left: L, top: T, width: W, height: H, opacity: spotOpacity }}
+        style={{ left: L, top: T, width: W, height: H, opacity: spotOpacity, transformOrigin: `${OX}% ${OY}%` }}
       >
         <b />
         <b />

@@ -14,15 +14,18 @@ export interface TourUiState {
   waitMsg: string | null;
   nextLabel: string;
   nextEnabled: boolean;
-  spot: { left: number; top: number; width: number; height: number } | null;
+  spot: { left: number; top: number; width: number; height: number; ox: number; oy: number } | null;
   blockers: { t: string; r: string; b: string; l: string };
 }
 
 /** Reads the CSS rect a step's spotlight should frame — falls back to
  * `.mon` if the target is missing or collapsed, rather than shrinking the
- * spotlight to a point somewhere off-screen. Padding is per-side rather
- * than uniform: a tilted step needs asymmetric padding (see trackSpot),
- * and reusing one function for both keeps targetRect itself simple. */
+ * spotlight to a point somewhere off-screen. Padding is per-side: even
+ * with the correct pivot (monTiltOrigin), rotating .spot's already-
+ * axis-aligned bounding rect a second time still compresses the edge
+ * further from the pivot (the right, here) more than the near edge —
+ * pivot-only doesn't fix that, it's a separate consequence of rotating
+ * a bounding box rather than the target's true rotated quad. */
 function targetRect(selector: string, pad: { left: number; right: number; top: number; bottom: number }) {
   let el = document.querySelector<HTMLElement>(selector);
   let r = el?.getBoundingClientRect();
@@ -37,6 +40,29 @@ function targetRect(selector: string, pad: { left: number; right: number; top: n
     width: r.width + pad.left + pad.right,
     height: r.height + pad.top + pad.bottom,
   };
+}
+
+/** Where a tilted step's spotlight should pivot, as a percentage of its
+ * own box — .mon's real transform-origin (machine.css: 30% 46%),
+ * converted to an absolute point and re-expressed relative to `rect`.
+ * Rotating .spot around its own center (the CSS default) was the actual
+ * cause of the padding imbalance previous passes were papering over
+ * with asymmetric padding: .mon's pivot sits well left and slightly
+ * above its own center, so a box rotating around ITS OWN center swings
+ * by a different amount than .mon itself does at the same angle — worse
+ * the further the target sits from .mon's own center (barely
+ * noticeable for the .mon-framing steps, much more visible for
+ * something like .stnav, off in the corner of the screen). Pivoting
+ * every tilted box around this same absolute point instead means it
+ * rotates in lockstep with .mon regardless of the target's own size or
+ * position, so no per-step padding fudging is needed at all. */
+function monTiltOrigin(rect: { left: number; top: number; width: number; height: number } | null) {
+  const mon = document.querySelector<HTMLElement>(".mon");
+  const monRect = mon?.getBoundingClientRect();
+  if (!monRect || !rect || rect.width < 1 || rect.height < 1) return { ox: 50, oy: 50 };
+  const absX = monRect.left + monRect.width * 0.3;
+  const absY = monRect.top + monRect.height * 0.46;
+  return { ox: ((absX - rect.left) / rect.width) * 100, oy: ((absY - rect.top) / rect.height) * 100 };
 }
 
 export function useOnboardingTour() {
@@ -102,43 +128,33 @@ export function useOnboardingTour() {
   const trackSpot = useCallback(() => {
     const s = TOUR_STEPS[stepIndexRef.current];
     if (s && onRef.current) {
-      // Tilted steps need asymmetric padding, not just more of it: .spot's
-      // rotateY is applied to an already axis-aligned bounding rect
-      // (getBoundingClientRect() on a tilted element measures its upright
-      // bounding box, not its true rotated quad), so rotating that rect a
-      // second time shifts visual mass toward the side rotateY brings
-      // forward — this design's positive rotateY brings the LEFT edge
-      // forward (machine.css). Padding symmetrically just moves both
-      // edges out by the same amount without fixing that imbalance: the
-      // left ends up with far more spare room than it needs while the
-      // right is still barely covered. Shifting padding from left to
-      // right compensates for it directly instead.
-      const base = s.pad ?? 12;
-      const pad = s.tilts
-        ? { left: Math.max(0, base - 14), right: base + 20, top: base, bottom: base }
-        : { left: base, right: base, top: base, bottom: base };
       // noHole (the tray step) hides the spotlight visually but must
       // still resolve a real rect here — the click-blocking panes cut
       // their hole from this same rect, and without one they'd cover the
       // tray completely and swallow the very click the step is waiting
       // on. Only `veiled` (mid-transition, nothing to frame yet) should
       // null the target out.
+      const base = s.pad ?? 12;
+      const pad = s.tilts
+        ? { left: Math.max(0, base - 7), right: base + 36, top: base, bottom: base }
+        : { left: base, right: base, top: base, bottom: base };
       const target = veiledRef.current ? null : targetRect(s.at, pad);
       const cur = spotCurRef.current;
+      let rect: { left: number; top: number; width: number; height: number } | null;
       if (!target || !cur) {
-        spotCurRef.current = target;
-        setSpot(target);
+        rect = target;
       } else {
         const EASE = 0.3;
-        const next = {
+        rect = {
           left: cur.left + (target.left - cur.left) * EASE,
           top: cur.top + (target.top - cur.top) * EASE,
           width: cur.width + (target.width - cur.width) * EASE,
           height: cur.height + (target.height - cur.height) * EASE,
         };
-        spotCurRef.current = next;
-        setSpot(next);
       }
+      const next = rect ? { ...rect, ...(s.tilts ? monTiltOrigin(rect) : { ox: 50, oy: 50 }) } : null;
+      spotCurRef.current = next;
+      setSpot(next);
     }
     trackRafRef.current = requestAnimationFrame(trackSpot);
   }, []);
@@ -230,6 +246,15 @@ export function useOnboardingTour() {
     // offer once both of those are turned off — there's no reduced-
     // motion variant of this feature to fall back to, only skipping it.
     if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    // The tour's steps all target parts of the interactive stage (.mon,
+    // .rail, #crt...) which only sit where the spotlight math expects
+    // them when the page is scrolled to the top — replaying via the "?"
+    // button after reading Experience/Education/Contact further down
+    // would otherwise start the tour on whatever those sections look
+    // like mid-scroll. Instant, not smooth: starting the tour while a
+    // scroll animation is still finishing is one more moving part than
+    // this needs, for a jump that's expected to be immediate anyway.
+    window.scrollTo({ top: 0, behavior: "instant" });
     setOn(true);
     setVeiled(false);
     setStepIndex(0);
@@ -307,6 +332,27 @@ export function useOnboardingTour() {
     };
     addEventListener("keydown", onKeyDown);
     return () => removeEventListener("keydown", onKeyDown);
+  }, [on, endTour]);
+
+  /* The nav-bar-links step leaves .bar nav itself clickable (it's the
+   * spotlight's hole) — clicking Experience/Education/Contact is a
+   * visitor choosing to go read that section, not a tour gesture, so
+   * the tour ends rather than staying on screen, still dimmed, over
+   * whatever they scrolled down to actually look at. Drops the scroll
+   * lock synchronously here rather than only through endTour's own
+   * state update: the browser's own smooth-scroll-to-anchor for the
+   * click is about to run as part of the same event, and needs
+   * overflow:hidden already gone by then, not on React's next tick. */
+  useEffect(() => {
+    if (!on) return;
+    const onClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement | null)?.closest?.(".bar nav a")) return;
+      document.documentElement.classList.remove("tour-on");
+      document.body.classList.remove("tour-on");
+      endTour();
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
   }, [on, endTour]);
 
   /* Scroll also drives the monitor's own levitation spring

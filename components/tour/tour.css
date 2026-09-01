@@ -42,10 +42,13 @@ body.tour-on {
 /* Applied when the current step's target lives inside .mon (tour-steps.ts
  * `tilts`) — matches .mon's own resting transform so the box reads as
  * flush against the monitor's tilted plane instead of a flat rectangle
- * floating in front of it. Pivots around its own center rather than
- * .mon's actual transform-origin: exact for a step framing .mon itself,
- * an approximation for a sub-element (#crt, .stnav) — close enough at
- * these small angles that the mismatch isn't visible. */
+ * floating in front of it. transform-origin is set inline per-frame
+ * (useOnboardingTour's monTiltOrigin) to .mon's own real pivot point
+ * rather than left at this rule's implicit center — pivoting around the
+ * wrong point rotates the box by a different amount than .mon itself
+ * swings at the same angle, which showed up as a padding imbalance for
+ * .mon itself and a much more visible mismatch for an off-center target
+ * like .stnav. */
 .spot.tilt {
   transform: var(--mon-tilt);
 }
