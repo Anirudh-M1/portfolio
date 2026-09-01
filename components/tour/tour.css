@@ -201,7 +201,7 @@
 .helpbtn {
   position: fixed;
   right: 22px;
-  bottom: 22px;
+  top: calc(var(--bar) + 16px);
   /* must sit above .blk (199) — otherwise the click-blocking panes cover
    * it once a tour is running and it becomes unclickable, with no way to
    * toggle the tour back off via this button */
@@ -242,7 +242,6 @@
     min-width: 0;
   }
   .helpbtn {
-    bottom: auto;
     top: 16px;
     right: 16px;
   }
