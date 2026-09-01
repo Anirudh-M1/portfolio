@@ -624,7 +624,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
   );
 
   const ejectDrive = useCallback(
-    (i: number) => {
+    (i: number, opts?: { silent?: boolean }) => {
       const d = DOCS[i];
       const rail = document.getElementById("rail");
       const chips = rail ? [...rail.querySelectorAll<HTMLElement>(".chip")] : [];
@@ -643,7 +643,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
           seated.innerHTML = "";
         }
         pockets[i]?.classList.remove("out");
-        idle();
+        if (!opts?.silent) idle();
         return Promise.resolve();
       }
 
@@ -660,7 +660,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         seated.innerHTML = "";
       }
       F.paint();
-      idle();
+      if (!opts?.silent) idle();
 
       return new Promise<void>((done) => {
         timeline(
@@ -707,7 +707,13 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         skipPostRef.current?.();
         clearTimers();
         if (loadedIndexRef.current !== null) {
-          const back = ejectDrive(loadedIndexRef.current);
+          // silent: true — a swap already knows where it's going next, so
+          // the outgoing doc (and statusline) stays on screen through the
+          // eject and the stagger below instead of blanking to "NO DEVICE"
+          // for a drive selection that isn't actually in question. That
+          // idle screen is still correct for onEject(), the one caller
+          // with no next drive queued.
+          const back = ejectDrive(loadedIndexRef.current, { silent: true });
           // The 2270ms stagger only means something when there's an
           // actual flight to stagger against — under reduced motion,
           // eject/insert both resolve instantly, so waiting first just
