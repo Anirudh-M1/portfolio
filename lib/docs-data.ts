@@ -184,8 +184,8 @@ export const SKILLS: SkillsData = {
 
 export interface ContactData {
   eyebrow: string;
-  /** Two lines, rendered with a hard <br> between them as in the source
-   * ("Open to new grad" / "software roles") rather than left to wrap. */
+  /** Two lines, rendered with a hard <br> between them — chosen as an
+   * explicit break rather than left to wrap. */
   headingLines: [string, string];
   body: string;
   links: DocLink[];
@@ -193,8 +193,8 @@ export interface ContactData {
 
 export const CONTACT: ContactData = {
   eyebrow: "Contact",
-  headingLines: ["Open to new grad", "software roles"],
-  body: "Graduating May 2027 and looking for new grad roles in distributed systems, backend infrastructure, or AI platform work. Happy to talk about any of the projects above.",
+  headingLines: ["Open to Software", "Engineering roles"],
+  body: "Happy to talk about any of the projects above.",
   links: [
     { label: "moholkar.anirudh@gmail.com", href: "mailto:moholkar.anirudh@gmail.com" },
     { label: "(224) 400-2589", href: "tel:+12244002589" },
