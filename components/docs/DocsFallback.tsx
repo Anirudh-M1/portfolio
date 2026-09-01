@@ -10,6 +10,11 @@ import "./docs.css";
 export function DocsFallback() {
   return (
     <div className="docs" id="docs">
+      {/* This container only ever renders where the interactive stage
+       * doesn't fit (site.css's body.js media query) or can't run at all
+       * (no-JS) — so this note never shows up alongside the real 3D
+       * machine, only in place of it. */}
+      <p className="docsnote">Viewing on mobile. For the full interactive 3D experience, use a desktop.</p>
       {DOCS.map((doc) => (
         <article key={doc.id} data-id={doc.id}>
           <DocBody doc={doc} />
