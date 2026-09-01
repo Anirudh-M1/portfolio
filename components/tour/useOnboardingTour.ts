@@ -155,9 +155,9 @@ export function useOnboardingTour() {
         // small as .stnav (~120px) — left ended up under-covered while
         // right had far more spare room than it needed, the opposite of
         // .mon's own imbalance.
-        const rightBonus = rawRect.width * 0.033;
-        const leftReduction = rawRect.width * 0.0065;
-        pad = { left: Math.max(0, base - leftReduction), right: base + rightBonus, top: base + 16, bottom: base + 16 };
+        const rightBonus = rawRect.width * 0.05;
+        const leftReduction = rawRect.width * 0.002;
+        pad = { left: Math.max(0, base - leftReduction), right: base + rightBonus, top: base + 6, bottom: base + 6 };
       }
       const target = rawRect ? padRect(rawRect, pad) : null;
       const cur = spotCurRef.current;
