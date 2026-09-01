@@ -18,22 +18,20 @@ export interface TourUiState {
   blockers: { t: string; r: string; b: string; l: string };
 }
 
-/** Reads the CSS rect a step's spotlight should frame — falls back to
- * `.mon` if the target is missing or collapsed, rather than shrinking the
- * spotlight to a point somewhere off-screen. Padding is per-side: even
- * with the correct pivot (monTiltOrigin), rotating .spot's already-
- * axis-aligned bounding rect a second time still compresses the edge
- * further from the pivot (the right, here) more than the near edge —
- * pivot-only doesn't fix that, it's a separate consequence of rotating
- * a bounding box rather than the target's true rotated quad. */
-function targetRect(selector: string, pad: { left: number; right: number; top: number; bottom: number }) {
+/** Resolves a step's target selector to its live rect — falls back to
+ * `.mon` if the target is missing or collapsed, rather than shrinking
+ * the spotlight to a point somewhere off-screen. */
+function resolveRect(selector: string) {
   let el = document.querySelector<HTMLElement>(selector);
   let r = el?.getBoundingClientRect();
   if (!r || r.width < 4 || r.height < 4) {
     el = document.querySelector<HTMLElement>(".mon");
     r = el?.getBoundingClientRect();
   }
-  if (!r) return null;
+  return r ?? null;
+}
+
+function padRect(r: DOMRect, pad: { left: number; right: number; top: number; bottom: number }) {
   return {
     left: r.left - pad.left,
     top: r.top - pad.top,
@@ -46,23 +44,34 @@ function targetRect(selector: string, pad: { left: number; right: number; top: n
  * own box — .mon's real transform-origin (machine.css: 30% 46%),
  * converted to an absolute point and re-expressed relative to `rect`.
  * Rotating .spot around its own center (the CSS default) was the actual
- * cause of the padding imbalance previous passes were papering over
- * with asymmetric padding: .mon's pivot sits well left and slightly
- * above its own center, so a box rotating around ITS OWN center swings
- * by a different amount than .mon itself does at the same angle — worse
- * the further the target sits from .mon's own center (barely
- * noticeable for the .mon-framing steps, much more visible for
- * something like .stnav, off in the corner of the screen). Pivoting
- * every tilted box around this same absolute point instead means it
- * rotates in lockstep with .mon regardless of the target's own size or
- * position, so no per-step padding fudging is needed at all. */
+ * cause of the earlier padding imbalance: .mon's pivot sits well left
+ * and slightly above its own center, so a box rotating around ITS OWN
+ * center swings by a different amount than .mon itself does at the
+ * same angle.
+ *
+ * This only holds up while `rect` is reasonably close to .mon's own
+ * size and position, though — for something small and off in a corner
+ * like .stnav, the shared pivot can land far outside rect's own box
+ * (a transform-origin of several hundred percent, measured), and
+ * perspective()'s foreshortening blows up rather than gracefully
+ * approximating anything at that distance: the box came out visibly
+ * more distorted than the plain own-center default it was meant to
+ * improve on. Falling back to 50/50 whenever the computed point would
+ * land too far outside rect avoids that: worse alignment for a target
+ * that far from .mon's real pivot isn't fixable by pivoting alone
+ * anyway (see targetRect's own asymmetric padding), so there's nothing
+ * lost by not chasing it here. */
 function monTiltOrigin(rect: { left: number; top: number; width: number; height: number } | null) {
   const mon = document.querySelector<HTMLElement>(".mon");
   const monRect = mon?.getBoundingClientRect();
   if (!monRect || !rect || rect.width < 1 || rect.height < 1) return { ox: 50, oy: 50 };
   const absX = monRect.left + monRect.width * 0.3;
   const absY = monRect.top + monRect.height * 0.46;
-  return { ox: ((absX - rect.left) / rect.width) * 100, oy: ((absY - rect.top) / rect.height) * 100 };
+  const ox = ((absX - rect.left) / rect.width) * 100;
+  const oy = ((absY - rect.top) / rect.height) * 100;
+  const MARGIN = 60; // percent outside [0,100] still treated as "close enough"
+  if (ox < -MARGIN || ox > 100 + MARGIN || oy < -MARGIN || oy > 100 + MARGIN) return { ox: 50, oy: 50 };
+  return { ox, oy };
 }
 
 export function useOnboardingTour() {
@@ -135,10 +144,22 @@ export function useOnboardingTour() {
       // on. Only `veiled` (mid-transition, nothing to frame yet) should
       // null the target out.
       const base = s.pad ?? 12;
-      const pad = s.tilts
-        ? { left: Math.max(0, base - 7), right: base + 36, top: base, bottom: base }
-        : { left: base, right: base, top: base, bottom: base };
-      const target = veiledRef.current ? null : targetRect(s.at, pad);
+      let pad = { left: base, right: base, top: base, bottom: base };
+      const rawRect = veiledRef.current ? null : resolveRect(s.at);
+      if (s.tilts && rawRect) {
+        // Proportional to the target's own (unpadded) width rather than a
+        // fixed pixel count calibrated against .mon specifically: the
+        // rotation-induced compression on the far edge scales with how
+        // big/far-out the target itself is, so a fixed constant that
+        // looked right for .mon (~1083px wide) way overshot a target as
+        // small as .stnav (~120px) — left ended up under-covered while
+        // right had far more spare room than it needed, the opposite of
+        // .mon's own imbalance.
+        const rightBonus = rawRect.width * 0.033;
+        const leftReduction = rawRect.width * 0.0065;
+        pad = { left: Math.max(0, base - leftReduction), right: base + rightBonus, top: base + 16, bottom: base + 16 };
+      }
+      const target = rawRect ? padRect(rawRect, pad) : null;
       const cur = spotCurRef.current;
       let rect: { left: number; top: number; width: number; height: number } | null;
       if (!target || !cur) {
