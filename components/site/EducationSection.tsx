@@ -12,6 +12,8 @@ export function EducationSection() {
         {EDUCATION.programLines[0]}
         <br />
         {EDUCATION.programLines[1]}
+        <br />
+        {EDUCATION.programLines[2]}
       </span>
       <div className="job" style={{ marginTop: 6 }}>
         <span className="when">

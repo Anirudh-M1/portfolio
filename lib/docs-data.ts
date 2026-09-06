@@ -130,9 +130,9 @@ export const EXPERIENCE: ExperienceData = {
 export interface EducationData {
   eyebrow: string;
   school: string;
-  /** Two lines, rendered with a hard <br> between them: the two degrees,
-   * each on its own line rather than run together. */
-  programLines: [string, string];
+  /** Three lines, rendered with a hard <br> between them: the degree, the
+   * minor, and the master's, each on its own line rather than run together. */
+  programLines: [string, string, string];
   gpaLine: string;
   gpaTag: string;
   body: string;
@@ -144,7 +144,8 @@ export const EDUCATION: EducationData = {
   school: "University of Illinois Urbana-Champaign",
   programLines: [
     "B.S. Computer Engineering · Grainger College of Engineering · Expected May 2027",
-    "M.C.S. Computer Science · Expected May 2028",
+    "Minor in Business · Gies College of Business",
+    "M.C.S. Computer Science · Expected May 2028 · in-person or online, alongside full-time work",
   ],
   gpaLine: "GPA 3.79 / 4.0",
   gpaTag: "Dean's List",
@@ -223,7 +224,7 @@ export const DOCS: DriveDoc[] = [
     sub: "Software engineer, systems and product",
     portrait: { src: "/portrait.jpg", alt: "Anirudh Moholkar" },
     lede:
-      "BS Computer Engineering, University of Illinois Urbana-Champaign, <b>May 2027</b><br />MCS Computer Science, University of Illinois Urbana-Champaign, <b>May 2028</b>",
+      "BS Computer Engineering, University of Illinois Urbana-Champaign, <b>May 2027</b><br />Minor in Business, Gies College of Business<br />MCS Computer Science, University of Illinois Urbana-Champaign, <b>May 2028</b> (in-person or online, alongside full-time work)",
     paragraphs: [
       "Dean's List, James Scholar, Fiddler Innovation Award, <b>3.79</b> GPA.",
       "Two consecutive engineering internships at <b>Zebra Technologies</b>: Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Both shipped to production, with work commended directly by Zebra's CIO.",
