@@ -40,6 +40,22 @@
    * something inside the monitor (tour.css) — one number to keep the two
    * in sync rather than a second hardcoded copy. */
   --mon-tilt: perspective(2600px) rotateX(2.5deg) rotateY(9deg);
+  /* drive panel visuals (docs-viz.css) — reuse the screen's own accent
+     tokens where the role already matches, so panel highlights read as
+     the same accents the CRT text uses elsewhere. --hot has no site
+     equivalent (nothing else signals a failure state) so it keeps its
+     original value, same as every -hi/-lo variant. */
+  --amber: var(--scr-num);
+  --amber-hi: #f5d488;
+  --amber-lo: #8a6b28;
+  --green: var(--scr-key);
+  --green-hi: #7fcfaa;
+  --green-lo: #2c5b4a;
+  --hot: #e07b45;
+  --hot-lo: #7c4023;
+  --text: var(--silk);
+  --muted: var(--dim);
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 * {
   box-sizing: border-box;
@@ -255,6 +271,11 @@ a {
   overflow: hidden;
   background: radial-gradient(128% 140% at 50% 40%, #15110b 0%, var(--glass) 66%, #070b09 100%);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.85) inset;
+  /* lets docs-viz.css's two-column split key off the screen's own inline
+     size rather than the viewport's — the monitor is a fraction of page
+     width, not all of it */
+  container-type: inline-size;
+  container-name: monitor;
 }
 /* A flat panel has no scanlines and no tube curvature. What it does have is
    the room reflected faintly in the glass — so the sheen is tinted with the

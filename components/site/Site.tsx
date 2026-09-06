@@ -3,6 +3,7 @@
 import { PcbCanvas } from "@/components/pcb/PcbCanvas";
 import { Machine } from "@/components/machine/Machine";
 import { DocsFallback } from "@/components/docs/DocsFallback";
+import { DriveVizDefs } from "@/components/docs/DriveVizDefs";
 import { OnboardingTour } from "@/components/tour/OnboardingTour";
 import { useOnboardingTour } from "@/components/tour/useOnboardingTour";
 import { NavBar } from "./NavBar";
@@ -40,6 +41,7 @@ export function Site() {
 
   return (
     <>
+      <DriveVizDefs />
       <PcbCanvas />
       <NavBar />
       <Machine tourSignal={tour.signal} />

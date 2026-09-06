@@ -1,0 +1,1201 @@
+/* ============================================================
+   drive panel visuals — ported from drive-visuals.html verbatim, except:
+   - the shared/generic selectors (single- and two-letter classes like .t,
+     .ax, .gl, plus the reduced-motion list) are additionally scoped under
+     `svg.viz` so they can't collide with this codebase's own classes of
+     the same name; every per-panel selector (.bom .cel, .docviz.on .pbi .bar,
+     etc.) was already unique and is untouched.
+   - .pbi .bar animates its own y/height geometry instead of a
+     transform-origin:bottom scale — see the comment at that rule.
+   No viewBox, path, delay, easing, keyframe or colour value changed
+   otherwise.
+   ============================================================ */
+.docviz {
+  position: relative;
+  margin: 0;
+}
+.docviz .replay {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  opacity: 0;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: 10px var(--mono);
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.docviz:hover .replay,
+.docviz .replay:focus-visible {
+  opacity: 1;
+}
+.docviz .replay:focus-visible {
+  outline: 1px solid var(--amber);
+}
+@media (pointer: coarse) {
+  .docviz .replay {
+    display: none;
+  }
+}
+svg.viz {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent;
+}
+
+/* two-column split once the monitor is wide enough for a >=340px panel
+   plus a readable prose column; below that .doc stays a single stacked
+   column (panel under prose) via normal block flow — no rule needed. */
+.crt .doc:has(> .docviz) {
+  display: block;
+}
+@container monitor (min-width: 680px) {
+  .crt .doc:has(> .docviz) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
+    gap: 0 28px;
+    align-items: start;
+  }
+  /* .docprose auto-places into column 1, row 1; this only needs to push
+     .docviz into column 2 — it lands in row 1 by default since nothing
+     else has claimed that cell yet. The panel is shorter than most specs'
+     prose, and .crt is one shared scroll container for both columns, so
+     without sticking the panel, scrolling far enough to read the tail of
+     a long spec scrolls the (already-finished) panel out of view first,
+     leaving blank space beside the remaining text. Sticky keeps it in
+     frame for as long as there's prose left to read.
+
+     Flush with row 1's top, the panel starts above the prose column's own
+     .rule divider (which comes after the kicker + h2, before tags/dl) — it
+     never draws a matching rule of its own, so it should start below where
+     that rule would land if it crossed the gutter, not above it. 7.8em
+     matches that rule's measured position at the prose column's own type
+     scale, without drawing a second rule across both columns. */
+  .crt .doc:has(> .docviz) .docviz {
+    grid-column: 2;
+    position: sticky;
+    top: 0;
+    margin-top: 7.8em;
+  }
+}
+
+svg.viz text {
+  font-family: var(--mono);
+}
+svg.viz .t {
+  fill: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+}
+svg.viz .t2 {
+  fill: var(--text);
+  font-size: 10px;
+}
+svg.viz .tn {
+  fill: var(--amber);
+  font-size: 11px;
+}
+svg.viz .tbig {
+  fill: var(--amber-hi);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+svg.viz .tg {
+  fill: var(--green-hi);
+  font-size: 10px;
+}
+svg.viz .th {
+  fill: var(--hot);
+  font-size: 10px;
+}
+svg.viz .tt {
+  font-size: 8px;
+  fill: var(--muted);
+}
+svg.viz .ax {
+  stroke: var(--line);
+  stroke-width: 1;
+  fill: none;
+}
+svg.viz .gl {
+  stroke: rgba(150, 185, 172, 0.075);
+  stroke-width: 1;
+  fill: none;
+}
+svg.viz .dsh {
+  stroke-dasharray: 2 3;
+}
+
+/* every animated path is pathLength-normalised, so length never truncates the draw */
+svg.viz .draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+/* markers ignore stroke-dashoffset and would render before their line exists,
+   so animated arrows carry a real arrowhead element instead */
+svg.viz .arrowIn {
+  opacity: 0;
+}
+.docviz.on .arrowIn {
+  animation: fadeIn 0.3s ease var(--d) forwards;
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes drawIn {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes riseY {
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes runX {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* RV's overcommit bars animate a transform-origin:left scale toward a
+   value carried in --sx. Registering it as a typed number keeps that
+   animation resolving correctly through the transform pipeline. */
+@property --sx {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* 1 BOM */
+.bom .cel {
+  opacity: 0;
+  fill: var(--green-lo);
+}
+.docviz.on .bom .cel {
+  animation: fadeIn 0.01s linear var(--d) forwards;
+}
+.bom .cel.f {
+  fill: var(--hot-lo);
+}
+.docviz.on .bom .cel.f.fx {
+  animation:
+    fadeIn 0.01s linear var(--d) forwards,
+    toPass 0.3s ease 1.5s forwards;
+}
+@keyframes toPass {
+  to {
+    fill: var(--green);
+  }
+}
+.bom .sweep {
+  fill: var(--amber);
+  opacity: 0;
+}
+.docviz.on .bom .sweep {
+  animation: sweepDown 2.6s linear 0.1s infinite;
+}
+@keyframes sweepDown {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  6% {
+    opacity: 0.4;
+  }
+  86% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(178px);
+  }
+}
+.bom .cmpB {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  transform: scaleY(0);
+}
+.docviz.on .bom .cmpB {
+  animation: riseY 0.85s cubic-bezier(0.25, 0, 0.2, 1) var(--d) forwards;
+}
+.bom .lbl {
+  opacity: 0;
+}
+.docviz.on .bom .lbl {
+  animation: fadeIn 0.4s ease var(--d) forwards;
+}
+.bom .big {
+  opacity: 0;
+}
+.docviz.on .bom .big {
+  animation: fadeIn 0.5s ease 2.5s forwards;
+}
+
+/* 2 PBI */
+/* transform-origin:bottom + transform-box:fill-box, animated toward a
+   value carried in a custom property, did not reliably anchor to the
+   box's own bottom edge in testing — the bars grew from the panel's
+   absolute top instead. Animating the rect's own y/height geometry
+   directly sidesteps that resolution question entirely: 288 is YB, the
+   chart's fixed bottom axis, the same for every bar, so a bar of height
+   244*s starting at y = 288 - 244*s always has its bottom edge sitting
+   exactly on that axis, unambiguously, for any s. */
+.pbi .bar {
+  y: calc(288px - 244px * var(--s0));
+  height: calc(244px * var(--s0));
+}
+.docviz.on .pbi .bar {
+  animation: redis 1.1s cubic-bezier(0.5, 0, 0.15, 1) var(--d) forwards;
+}
+@keyframes redis {
+  to {
+    y: calc(288px - 244px * var(--s1));
+    height: calc(244px * var(--s1));
+    fill: var(--green);
+  }
+}
+.pbi .ghostLine {
+  opacity: 0;
+}
+.docviz.on .pbi .ghostLine {
+  animation: ghostIn 0.6s ease 2.9s forwards;
+}
+@keyframes ghostIn {
+  to {
+    opacity: 0.5;
+  }
+}
+.pbi .peakLine {
+  opacity: 0;
+}
+.docviz.on .pbi .peakLine {
+  animation: peakOut 3.4s ease 0.4s forwards;
+}
+@keyframes peakOut {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.28;
+  }
+}
+.pbi .peakLo {
+  opacity: 0;
+}
+.docviz.on .pbi .peakLo {
+  animation: fadeIn 0.6s ease 2.9s forwards;
+}
+.pbi .ring {
+  opacity: 0;
+}
+.docviz.on .pbi .ring {
+  animation: fadeIn 0.5s ease 2.4s forwards;
+}
+.pbi .zomb {
+  stroke-dashoffset: var(--z);
+  opacity: 0;
+}
+.docviz.on .pbi .zomb {
+  animation:
+    zombDraw 0.9s cubic-bezier(0.3, 0, 0.2, 1) 2.6s forwards,
+    zombPulse 2.1s ease 3.5s infinite;
+}
+@keyframes zombDraw {
+  0% {
+    opacity: 1;
+    stroke-dashoffset: var(--z);
+  }
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes zombPulse {
+  0%,
+  100% {
+    stroke-width: 11;
+    opacity: 1;
+  }
+  50% {
+    stroke-width: 14.5;
+    opacity: 0.78;
+  }
+}
+.pbi .zlab {
+  opacity: 0;
+}
+.docviz.on .pbi .zlab {
+  animation: fadeIn 0.5s ease 3.4s forwards;
+}
+.pbi .zone {
+  opacity: 0;
+}
+.docviz.on .pbi .zone {
+  animation: zoneCycle 3.4s ease 0.3s forwards;
+}
+@keyframes zoneCycle {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 3 ENDPOINT */
+.ep .sq {
+  opacity: 0;
+  fill: var(--amber-lo);
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+.docviz.on .ep .sq {
+  animation: stepIn 0.22s ease-out var(--d) forwards;
+}
+@keyframes stepIn {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+.ep .conn {
+  stroke: var(--amber-lo);
+  stroke-width: 1;
+  opacity: 0;
+}
+.docviz.on .ep .conn {
+  animation: fadeIn 0.16s ease var(--d) forwards;
+}
+.ep .pq {
+  opacity: 0;
+  fill: var(--green);
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+.docviz.on .ep .pq {
+  animation: dispatchIn 0.44s cubic-bezier(0.2, 0.75, 0.3, 1) var(--d) forwards;
+}
+@keyframes dispatchIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scaleY(0.5);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+.ep .fan {
+  stroke: var(--green-lo);
+  stroke-width: 1;
+  fill: none;
+}
+.docviz.on .ep .fan {
+  animation: drawIn 0.38s ease var(--d) forwards;
+}
+.ep .barS {
+  fill: var(--amber-lo);
+  transform-box: fill-box;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.docviz.on .ep .barS {
+  animation: runX 2.6s linear 0.15s forwards;
+}
+.ep .barP {
+  fill: var(--green);
+  transform-box: fill-box;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.docviz.on .ep .barP {
+  animation: runP 0.3s linear 0.15s forwards;
+}
+@keyframes runP {
+  to {
+    transform: scaleX(0.0125);
+  }
+}
+.ep .dimg {
+  opacity: 0;
+}
+.docviz.on .ep .dimg {
+  animation: fadeIn 0.5s ease 2.8s forwards;
+}
+
+/* 4 LOG QUERIER */
+.lq .edge {
+  stroke: var(--line);
+  stroke-width: 1;
+  fill: none;
+}
+.lq .edge.lazy {
+  stroke: var(--hot-lo);
+  stroke-dasharray: 3 3;
+}
+.docviz.on .lq .edge.lazy {
+  animation: solid 0.4s ease 1.1s forwards;
+}
+@keyframes solid {
+  to {
+    stroke: var(--line);
+    stroke-dasharray: 3 0;
+  }
+}
+.lq .q {
+  stroke: var(--amber);
+  stroke-width: 1.8;
+  fill: none;
+  stroke-dasharray: 0.06 1;
+  opacity: 0;
+}
+.docviz.on .lq .q {
+  animation: qFly 2.4s ease-out var(--d) infinite;
+}
+@keyframes qFly {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  38% {
+    opacity: 0;
+    stroke-dashoffset: -1.1;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: -1.1;
+  }
+}
+.lq .scanb {
+  fill: var(--amber);
+  opacity: 0;
+}
+.docviz.on .lq .scanb {
+  animation: scanF 2.4s linear var(--d) infinite;
+}
+@keyframes scanF {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  14% {
+    opacity: 0.6;
+  }
+  34% {
+    opacity: 0.6;
+    transform: translateY(40px);
+  }
+  40%,
+  100% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+.lq .r {
+  stroke: var(--green-hi);
+  fill: none;
+}
+.docviz.on .lq .r {
+  animation: drawIn 0.7s ease var(--d) forwards;
+}
+.lq .pl {
+  fill: none;
+}
+.docviz.on .lq .pl {
+  animation: drawIn 1.1s ease var(--d) forwards;
+}
+.lq .brk {
+  opacity: 0;
+}
+.docviz.on .lq .brk {
+  animation: fadeIn 0.5s ease 2.9s forwards;
+}
+.lq .callerRing {
+  stroke: var(--amber);
+  stroke-width: 1.4;
+  fill: none;
+  opacity: 0;
+}
+.docviz.on .lq .callerRing {
+  animation: fadeIn 0.4s ease 0.15s forwards;
+}
+
+/* 5 MEMBERSHIP */
+.mb .cv {
+  fill: none;
+  stroke-width: 1.9;
+}
+.docviz.on .mb .cv {
+  animation: drawIn 1.4s ease var(--d) forwards;
+}
+.mb .ar {
+  opacity: 0;
+}
+.docviz.on .mb .ar {
+  animation: a10 0.9s ease 1.5s forwards;
+}
+@keyframes a10 {
+  to {
+    opacity: 0.1;
+  }
+}
+.mb .st {
+  opacity: 0;
+}
+.docviz.on .mb .st {
+  animation: fadeIn 0.4s ease var(--d) forwards;
+}
+.docviz.on .mb .susp {
+  animation:
+    fadeIn 0.4s ease 1.9s forwards,
+    pulseO 1.8s ease 2.3s infinite;
+}
+@keyframes pulseO {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+.mb .refA {
+  stroke: var(--green-hi);
+  stroke-width: 1.4;
+  fill: none;
+}
+.docviz.on .mb .refA {
+  animation: drawIn 0.6s ease 2.5s forwards;
+}
+.mb .refT {
+  opacity: 0;
+}
+.docviz.on .mb .refT {
+  animation: fadeIn 0.4s ease 2.9s forwards;
+}
+
+/* 6 RAINSTORM */
+.rs .b {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  transform: scaleY(0);
+}
+.docviz.on .rs .b {
+  animation: riseY 1s cubic-bezier(0.25, 0, 0.2, 1) var(--d) forwards;
+}
+.rs .dimg {
+  opacity: 0;
+}
+.docviz.on .rs .dimg {
+  animation: fadeIn 0.5s ease 1.5s forwards;
+}
+.rs .step {
+  opacity: 0;
+}
+.docviz.on .rs .step {
+  animation: fadeIn 0.01s linear var(--d) forwards;
+}
+.rs .conv {
+  stroke: var(--green-lo);
+  stroke-width: 1;
+  fill: none;
+}
+.docviz.on .rs .conv {
+  animation: drawIn 0.5s ease var(--d) forwards;
+}
+.rs .drop {
+  fill: var(--amber);
+  opacity: 0;
+}
+.docviz.on .rs .drop {
+  animation: dropDown 1.9s linear var(--d) infinite;
+}
+@keyframes dropDown {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 1;
+    transform: translateY(14px);
+  }
+  56%,
+  100% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.rs .flow {
+  fill: var(--amber);
+  opacity: 0;
+}
+.docviz.on .rs .flow {
+  animation: flowIn 1.9s linear var(--d) infinite;
+}
+@keyframes flowIn {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+    transform: translate(var(--dx), 20px);
+  }
+  62%,
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), 20px);
+  }
+}
+
+/* 7 HYDFS */
+.hy .nd {
+  fill: none;
+  stroke: var(--green-lo);
+  stroke-width: 1.3;
+}
+.hy .blk {
+  fill: var(--green-lo);
+}
+.docviz.on .hy .deadN {
+  animation: nodeDie 0.45s ease 0.9s forwards;
+}
+@keyframes nodeDie {
+  to {
+    stroke: var(--hot);
+    opacity: 0.35;
+  }
+}
+.docviz.on .hy .deadB {
+  animation: blkDie 0.45s ease 0.9s forwards;
+}
+@keyframes blkDie {
+  to {
+    fill: var(--hot-lo);
+    opacity: 0.35;
+  }
+}
+.hy .failT {
+  opacity: 0;
+}
+.docviz.on .hy .failT {
+  animation: fadeIn 0.4s ease 1.15s forwards;
+}
+.hy .rep {
+  fill: none;
+}
+.docviz.on .hy .rep {
+  animation: drawIn 0.9s ease var(--d) forwards;
+}
+.hy .newb {
+  opacity: 0;
+  fill: var(--green-hi);
+}
+.docviz.on .hy .newb {
+  animation: fadeIn 0.3s ease var(--d) forwards;
+}
+.hy .fb {
+  fill: var(--green);
+  transform-box: fill-box;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.docviz.on .hy .fb {
+  animation: runX 0.9s cubic-bezier(0.25, 0, 0.2, 1) var(--d) forwards;
+}
+.hy .mb2 {
+  fill: var(--muted);
+  transform-box: fill-box;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.docviz.on .hy .mb2 {
+  animation: runM 3s linear 2.3s infinite;
+}
+@keyframes runM {
+  0% {
+    transform: scaleX(0);
+    fill: var(--green-hi);
+  }
+  6% {
+    transform: scaleX(0.06);
+    fill: var(--green-hi);
+  }
+  30% {
+    transform: scaleX(0.06);
+    fill: var(--muted);
+  }
+  100% {
+    transform: scaleX(0.06);
+    fill: var(--muted);
+  }
+}
+.hy .brk {
+  opacity: 0;
+}
+.docviz.on .hy .brk {
+  animation: fadeIn 0.5s ease 2.7s forwards;
+}
+
+/* 8 RV */
+.rv .pte {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.rv .vb0 {
+  fill: var(--muted);
+  opacity: 0.3;
+}
+.rv .vb1 {
+  fill: var(--green);
+  opacity: 0;
+}
+.docviz.on .rv .vb1 {
+  animation: fadeIn 0.01s linear var(--d) forwards;
+}
+.rv .frm {
+  fill: var(--green-lo);
+  opacity: 0;
+}
+.docviz.on .rv .frm {
+  animation: fadeIn 0.25s ease var(--d) forwards;
+}
+.rv .mp {
+  stroke: var(--amber);
+  stroke-width: 1.1;
+  fill: none;
+  opacity: 0.85;
+}
+.docviz.on .rv .mp {
+  animation: drawIn 0.4s ease var(--d) forwards;
+}
+.rv .flt {
+  opacity: 0;
+}
+.docviz.on .rv .flt {
+  animation: faultPop 0.45s ease var(--d) forwards;
+}
+@keyframes faultPop {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+.rv .ghost {
+  fill: none;
+  stroke: var(--hot-lo);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+.rv .cur {
+  fill: var(--amber);
+  opacity: 0;
+}
+.docviz.on .rv .cur {
+  animation: curStep 3.6s steps(1, end) var(--d) infinite;
+}
+@keyframes curStep {
+  0%,
+  8% {
+    opacity: 0.9;
+  }
+  12%,
+  100% {
+    opacity: 0;
+  }
+}
+.rv .ovb {
+  transform-box: fill-box;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.docviz.on .rv .ovb {
+  animation: runO 0.8s ease var(--d) forwards;
+}
+@keyframes runO {
+  to {
+    transform: scaleX(var(--sx));
+  }
+}
+
+/* 9 FROGGER */
+.fg .scan {
+  stroke: var(--amber-hi);
+  stroke-width: 1.6;
+}
+.docviz.on .fg .scan {
+  animation: rast 3s linear infinite;
+}
+@keyframes rast {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(158px);
+    opacity: 0;
+  }
+}
+.fg .glow {
+  opacity: 0.5;
+}
+.docviz.on .fg .glow {
+  animation: rast 3s linear infinite;
+}
+.fg .sp {
+  opacity: 0;
+}
+.docviz.on .fg .sp {
+  animation: rowOn 3s linear var(--d) infinite;
+}
+@keyframes rowOn {
+  0%,
+  2% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.fg .hs {
+  stroke: var(--green-hi);
+  stroke-width: 1.2;
+  fill: none;
+}
+.fg .vs {
+  stroke: var(--amber);
+  stroke-width: 1.2;
+  fill: none;
+}
+
+/* 10 LLM */
+.ld .cd {
+  fill: var(--line);
+}
+.ld .cd.kw {
+  fill: var(--green-lo);
+}
+.ld .cutR {
+  stroke: var(--hot);
+  stroke-width: 1.6;
+  opacity: 0;
+}
+.docviz.on .ld .cutR {
+  animation: fadeIn 0.3s ease var(--d) forwards;
+}
+.ld .cutG {
+  stroke: var(--green-hi);
+  stroke-width: 1.6;
+  opacity: 0;
+}
+.docviz.on .ld .cutG {
+  animation: fadeIn 0.3s ease var(--d) forwards;
+}
+.ld .sev {
+  opacity: 0;
+}
+.docviz.on .ld .sev {
+  animation: a45 0.5s ease 1.6s forwards;
+}
+@keyframes a45 {
+  to {
+    opacity: 0.45;
+  }
+}
+.ld .whole {
+  fill: var(--green);
+  opacity: 0;
+}
+.docviz.on .ld .whole {
+  animation: a09 0.5s ease 1.75s forwards;
+}
+@keyframes a09 {
+  to {
+    opacity: 0.09;
+  }
+}
+.ld .tree {
+  stroke: var(--green-hi);
+  stroke-width: 1.1;
+  fill: none;
+}
+.docviz.on .ld .tree {
+  animation: drawIn 0.7s ease var(--d) forwards;
+}
+.ld .treeT {
+  opacity: 0;
+}
+.docviz.on .ld .treeT {
+  animation: fadeIn 0.4s ease var(--d) forwards;
+}
+
+/* 11 DFA */
+.df .ly {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.df .req {
+  fill: var(--amber);
+  opacity: 0;
+}
+.docviz.on .df .req {
+  animation: down 3.4s ease infinite;
+}
+@keyframes down {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  6% {
+    opacity: 1;
+  }
+  34% {
+    opacity: 1;
+    transform: translateY(104px);
+  }
+  40% {
+    opacity: 0;
+    transform: translateY(104px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.df .ent {
+  fill: var(--hot);
+  opacity: 0;
+}
+.docviz.on .df .ent {
+  animation: stopped 3.4s ease infinite;
+}
+@keyframes stopped {
+  0%,
+  40% {
+    opacity: 0;
+    transform: translateY(104px);
+  }
+  46% {
+    opacity: 1;
+    transform: translateY(104px);
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(56px);
+  }
+  68% {
+    opacity: 0;
+    transform: translateY(56px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.df .dto {
+  fill: var(--green-hi);
+  opacity: 0;
+}
+.docviz.on .df .dto {
+  animation: up 3.4s ease infinite;
+}
+@keyframes up {
+  0%,
+  66% {
+    opacity: 0;
+    transform: translateY(56px);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(56px);
+  }
+  92% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.df .bd {
+  stroke: var(--green-hi);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+}
+.df .exX {
+  opacity: 0;
+}
+.docviz.on .df .exX {
+  animation: exFlash 3.4s ease infinite;
+}
+@keyframes exFlash {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  50%,
+  64% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 12 HELP FORUM */
+.hf .span {
+  transform-box: fill-box;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.docviz.on .hf .span {
+  animation: runX 1.5s cubic-bezier(0.3, 0, 0.2, 1) 0.4s forwards;
+}
+.hf .ms {
+  opacity: 0;
+}
+.docviz.on .hf .ms {
+  animation: fadeIn 0.5s ease var(--d) forwards;
+}
+.hf .dimt {
+  opacity: 0;
+}
+.docviz.on .hf .dimt {
+  animation: fadeIn 0.5s ease 1.7s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  svg.viz * {
+    animation: none !important;
+  }
+  svg.viz .draw {
+    stroke-dashoffset: 0 !important;
+  }
+  svg.viz .cel,
+  svg.viz .sq,
+  svg.viz .conn,
+  svg.viz .pq,
+  svg.viz .st,
+  svg.viz .frm,
+  svg.viz .vb1,
+  svg.viz .sp,
+  svg.viz .cutR,
+  svg.viz .cutG,
+  svg.viz .ms,
+  svg.viz .brk,
+  svg.viz .dimg,
+  svg.viz .flt,
+  svg.viz .step,
+  svg.viz .lbl,
+  svg.viz .treeT,
+  svg.viz .ar,
+  svg.viz .whole,
+  svg.viz .sev,
+  svg.viz .big,
+  svg.viz .dimt,
+  svg.viz .failT,
+  svg.viz .refT,
+  svg.viz .callerRing,
+  svg.viz .beforeMk,
+  svg.viz .afterMk {
+    opacity: 1 !important;
+  }
+  svg.viz .bar {
+    y: calc(288px - 244px * var(--s1)) !important;
+    height: calc(244px * var(--s1)) !important;
+    fill: var(--green) !important;
+  }
+  svg.viz .peakLine {
+    opacity: 0.28 !important;
+  }
+  svg.viz .peakLo,
+  svg.viz .ring,
+  svg.viz .zomb,
+  svg.viz .zlab {
+    opacity: 1 !important;
+  }
+  svg.viz .zomb {
+    stroke-dashoffset: 0 !important;
+  }
+  svg.viz .b,
+  svg.viz .fb,
+  svg.viz .barS,
+  svg.viz .barP,
+  svg.viz .cmpB,
+  svg.viz .span {
+    transform: none !important;
+  }
+  svg.viz .mb2 {
+    transform: scaleX(0.06) !important;
+  }
+  svg.viz .ovb {
+    transform: scaleX(var(--sx)) !important;
+  }
+  svg.viz .arrowIn {
+    opacity: 1 !important;
+  }
+  svg.viz .scan,
+  svg.viz .glow,
+  svg.viz .req,
+  svg.viz .ent,
+  svg.viz .dto,
+  svg.viz .exX,
+  svg.viz .zone,
+  svg.viz .sweep,
+  svg.viz .q,
+  svg.viz .scanb,
+  svg.viz .drop,
+  svg.viz .flow,
+  svg.viz .cur {
+    display: none;
+  }
+  svg.viz .ghostLine {
+    opacity: 0.5 !important;
+  }
+}
