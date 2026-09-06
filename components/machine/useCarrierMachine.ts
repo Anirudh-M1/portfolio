@@ -163,6 +163,23 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
     setScreen({ kind: "idle" });
   }, [clearTimers, setStatusline]);
 
+  /* A beat of static as the screen loses signal — played every time a
+   * drive is physically unplugged (ejectDrive, both the silent mid-swap
+   * case and the explicit onEject with nothing queued next), not when
+   * the new drive's content becomes ready. During a silent swap the old
+   * doc stays on screen underneath it (see the comment in ejectDrive),
+   * which is exactly the point: the glitch marks the disconnect, not a
+   * content change that may not even happen yet. */
+  const glitchScreen = useCallback(() => {
+    if (reduced) return;
+    const crt = crtRef.current;
+    if (!crt) return;
+    crt.classList.remove("glitch");
+    void crt.offsetWidth; // restart the animation on immediate re-trigger
+    crt.classList.add("glitch");
+    crt.addEventListener("animationend", () => crt.classList.remove("glitch"), { once: true });
+  }, []);
+
   /* Renders the completed doc and, once mounted, staggers each of its
    * top-level children in — matching the source's per-child .animate()
    * reveal on `.doc > *`. Skipped outright under reduced motion. */
@@ -651,7 +668,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
   );
 
   const ejectDrive = useCallback(
-    (i: number, opts?: { silent?: boolean }) => {
+    (i: number) => {
       const d = DOCS[i];
       const rail = document.getElementById("rail");
       const chips = rail ? [...rail.querySelectorAll<HTMLElement>(".chip")] : [];
@@ -675,7 +692,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
           seated.innerHTML = "";
         }
         pockets[i]?.classList.remove("out", "returning");
-        if (!opts?.silent) idle();
+        idle();
         return Promise.resolve();
       }
 
@@ -692,7 +709,8 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         seated.innerHTML = "";
       }
       F.paint();
-      if (!opts?.silent) idle();
+      glitchScreen();
+      idle();
 
       return new Promise<void>((done) => {
         timeline(
@@ -715,7 +733,7 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         pockets[i]?.classList.remove("out", "returning");
       });
     },
-    [idle, ledOff, makeFlight],
+    [idle, ledOff, makeFlight, glitchScreen],
   );
 
   /* Swap orchestration. When a drive is already seated, the outgoing
@@ -739,13 +757,11 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
         skipPostRef.current?.();
         clearTimers();
         if (loadedIndexRef.current !== null) {
-          // silent: true — a swap already knows where it's going next, so
-          // the outgoing doc (and statusline) stays on screen through the
-          // eject and the stagger below instead of blanking to "NO DEVICE"
-          // for a drive selection that isn't actually in question. That
-          // idle screen is still correct for onEject(), the one caller
-          // with no next drive queued.
-          const back = ejectDrive(loadedIndexRef.current, { silent: true });
+          // The outgoing doc clears to "NO DEVICE" immediately — the drive
+          // is physically gone the moment it's ejected, mid-swap or not,
+          // so the screen shouldn't keep showing content for a drive
+          // that's no longer there.
+          const back = ejectDrive(loadedIndexRef.current);
           // The 2270ms stagger only means something when there's an
           // actual flight to stagger against — under reduced motion,
           // eject/insert both resolve instantly, so waiting first just
