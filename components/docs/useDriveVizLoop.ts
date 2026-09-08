@@ -3,11 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Drives one drive-visual panel's animation: it plays once when the panel
- * enters view and then holds its settled state continuously — it does not
- * auto-replay. An IntersectionObserver starts it as the panel enters view —
- * DocsFallback mounts all twelve panels at once on mobile, so off-screen
- * ones cost nothing — and resets `on` so it's ready to play again if the
- * panel is scrolled away and back, or the replay button is used.
+ * first enters view and then holds its settled state continuously — it
+ * does not auto-replay. An IntersectionObserver gates that first play so
+ * DocsFallback's twelve simultaneously-mounted mobile panels don't all
+ * animate off-screen for nothing, but once played, `played` never resets —
+ * the panel's own entrance (the reveal-children stagger in
+ * useCarrierMachine) can transiently dip the figure's intersection ratio
+ * below the threshold while it's still animating in, and treating that as
+ * "left view" re-armed a second play() the instant it came back, which is
+ * exactly the restart this hook exists to prevent. The manual replay
+ * button is the only way to play it again after that.
  *
  * The "on" flag that gates every panel's CSS animations is React state,
  * not an imperative classList toggle on the raw SVG — the SVG markup is
@@ -49,15 +54,13 @@ export function useDriveVizLoop() {
     replayRef.current = play;
 
     const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting && !played) {
-            played = true;
-            play();
-          } else if (!e.isIntersecting) {
-            played = false;
-          }
-        }),
+      (entries) => {
+        if (played) return;
+        if (entries.some((e) => e.isIntersecting)) {
+          played = true;
+          play();
+        }
+      },
       { threshold: 0.25 },
     );
     io.observe(fig);

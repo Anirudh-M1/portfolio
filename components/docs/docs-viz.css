@@ -573,6 +573,9 @@ svg.viz .arrowIn {
 .docviz.on .mb .st {
   animation: fadeIn 0.4s ease var(--d) forwards;
 }
+.mb .susp {
+  opacity: 0;
+}
 .docviz.on .mb .susp {
   animation:
     fadeIn 0.4s ease 1.9s forwards,
@@ -594,6 +597,16 @@ svg.viz .arrowIn {
 }
 .docviz.on .mb .refA {
   animation: drawIn 0.6s ease 2.5s forwards;
+}
+.mb .toSusp,
+.mb .toFail {
+  opacity: 0;
+}
+.docviz.on .mb .toSusp {
+  animation: fadeIn 0.3s ease 1.9s forwards;
+}
+.docviz.on .mb .toFail {
+  animation: fadeIn 0.3s ease 3s forwards;
 }
 .mb .refT {
   opacity: 0;
@@ -1143,7 +1156,10 @@ svg.viz .arrowIn {
   svg.viz .refT,
   svg.viz .callerRing,
   svg.viz .beforeMk,
-  svg.viz .afterMk {
+  svg.viz .afterMk,
+  svg.viz .toSusp,
+  svg.viz .toFail,
+  svg.viz .susp {
     opacity: 1 !important;
   }
   svg.viz .bar {
