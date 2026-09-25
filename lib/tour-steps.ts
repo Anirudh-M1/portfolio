@@ -51,7 +51,7 @@ export interface TourStep {
 
 export const TOUR_STEPS: TourStep[] = [
   {
-    text: "Short on time? This opens every project's visual on one screen.",
+    text: "Short on time? This shows every project I've built on one screen, each as a graph of what it did.",
     at: ".glancebtn",
     pad: 8,
     wait: "glance",
@@ -60,7 +60,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     // Runs over the open overview, which drops beneath the tour layer
     // while a tour is on (glance.css), so this frames its grid of cards.
-    text: "Each graph plays as it scrolls in. Click any project to load its drive onto the machine.",
+    text: "Each card is a project I completed. Click any one to load it onto the machine and read the full write-up.",
     at: ".glance-grid",
     pad: 8,
     wait: "chip",

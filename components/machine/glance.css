@@ -102,6 +102,30 @@ html.tour-on .glance {
   outline-offset: 2px;
 }
 
+.glance-lede {
+  max-width: 760px;
+  margin: 0 0 22px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--dim);
+}
+.glance-lede b {
+  color: var(--silk);
+  font-weight: 600;
+}
+.glance-more {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: color 0.15s;
+}
+.glance-card:hover .glance-more {
+  color: var(--gold);
+}
 .glance-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
