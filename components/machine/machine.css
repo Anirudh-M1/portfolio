@@ -301,7 +301,7 @@ a {
   overflow-y: auto;
   overflow-x: hidden;
   color: var(--phos);
-  font-size: clamp(10.5px, 0.86vw, 12.5px);
+  font-size: clamp(11px, 0.93vw, 13.25px);
   line-height: 1.72;
   text-shadow: 0 0 7px rgba(255, 190, 104, 0.26);
   scrollbar-width: thin;
