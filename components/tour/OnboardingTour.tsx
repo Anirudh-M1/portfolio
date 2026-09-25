@@ -71,7 +71,7 @@ export function OnboardingTour({ tour }: OnboardingTourProps) {
       />
       <div className="tutcard">
         <div className="bar">
-          <em style={{ fontStyle: "normal" }}>ANR / GUIDE</em>
+          <em style={{ fontStyle: "normal", textTransform: "none" }}>AMM - Guide</em>
           <span>
             STEP <b className="tstep">{tour.stepIndex + 1}</b> / <b className="ttotal">{tour.total}</b>
           </span>
