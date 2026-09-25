@@ -12,6 +12,10 @@
 }
 .sec {
   margin-bottom: 70px;
+  /* the nav bar scrolls away with the page, so a nav-link jump would
+   * otherwise land the section's eyebrow flush against (half off) the
+   * top edge of the window */
+  scroll-margin-top: 40px;
 }
 .sec:last-child {
   margin-bottom: 0;

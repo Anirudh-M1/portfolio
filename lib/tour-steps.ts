@@ -12,7 +12,7 @@
 // exist before the machine/tour DOM does — useOnboardingTour resolves
 // `at` against the current document each time it needs the target rect.
 
-export type TourWaitKind = "chip" | "nav" | "loaded";
+export type TourWaitKind = "chip" | "nav" | "loaded" | "glance";
 
 export interface TourStep {
   text: string;
@@ -51,20 +51,37 @@ export interface TourStep {
 
 export const TOUR_STEPS: TourStep[] = [
   {
-    text: "This is the machine. Thirteen projects live on the drives in the tray below: pick one and it loads onto the board.",
-    at: ".mon",
-    pad: 16,
+    text: "Short on time? This opens every project's visual on one screen.",
+    at: ".glancebtn",
+    pad: 8,
+    wait: "glance",
+    waitMsg: "Click View all at a glance",
+  },
+  {
+    // Runs over the open overview, which drops beneath the tour layer
+    // while a tour is on (glance.css), so this frames its grid of cards.
+    text: "Each graph plays as it scrolls in. Click any project to load its drive onto the machine.",
+    at: ".glance-grid",
+    pad: 8,
+    wait: "chip",
+    waitMsg: "Click a project",
+  },
+  {
+    text: "It boots right there on the screen, like an old terminal coming up, then the project's full write-up.",
+    at: "#crt",
+    pad: 12,
+    veilUntil: "loaded",
     tilts: true,
   },
   {
-    text: "Try it: click any drive in the tray.",
+    text: "The same drives sit in the tray below. Click one to load it directly.",
     at: ".rail",
     pad: 10,
     wait: "chip",
     waitMsg: "Click a drive in the tray",
   },
   {
-    text: "It boots right there on the screen, like an old terminal coming up, then the project's actual write-up.",
+    text: "The old drive ejects back to the tray and the new one seats in its place.",
     at: "#crt",
     pad: 12,
     veilUntil: "loaded",

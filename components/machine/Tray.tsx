@@ -46,6 +46,8 @@ function buildBanks(docs: DriveDoc[]) {
 
 export interface TrayProps {
   machine: ReturnType<typeof useCarrierMachine>;
+  /** Opens the all-projects overview. */
+  onGlance: () => void;
 }
 
 /* Arrow keys walk the tray one chip at a time, wrapping around — the
@@ -63,7 +65,7 @@ function onRailKeyDown(e: KeyboardEvent<HTMLDivElement>) {
   }
 }
 
-export function Tray({ machine }: TrayProps) {
+export function Tray({ machine, onGlance }: TrayProps) {
   const banks = buildBanks(DOCS);
   let i = 0;
   return (
@@ -76,6 +78,9 @@ export function Tray({ machine }: TrayProps) {
         <span className="hint" id="hint">
           Select one to load
         </span>
+        <button className="glancebtn" type="button" onClick={onGlance} aria-haspopup="dialog">
+          View all at a glance
+        </button>
       </div>
       {/* The source's #rail carries role="list" directly over .bank/
        * .bank-row wrapper divs, with .pocket (role="listitem") several

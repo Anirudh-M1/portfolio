@@ -1,10 +1,12 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Cables } from "./Cables";
 import { Monitor } from "./Monitor";
 import { CarrierBoard } from "./CarrierBoard";
 import { Tray } from "./Tray";
 import { FlightLayer } from "./FlightLayer";
+import { GlanceOverlay } from "./GlanceOverlay";
 import { useCarrierMachine, type TourSignalName } from "./useCarrierMachine";
 import "./machine.css";
 
@@ -29,6 +31,33 @@ export interface MachineProps {
  * app/page.tsx yet — the old carrier-board design still owns the page. */
 export function Machine({ tourSignal }: MachineProps) {
   const machine = useCarrierMachine(tourSignal);
+  const [glance, setGlance] = useState(false);
+  const closeGlance = useCallback(() => setGlance(false), []);
+  const openGlance = useCallback(() => {
+    setGlance(true);
+    tourSignal?.("glance");
+  }, [tourSignal]);
+  const { onChipClick, busy } = machine;
+  // Picking a card closes the overview and loads that drive the same way a
+  // tray chip does, with the stage scrolled into view so the swap is seen.
+  // load() silently ignores clicks while a flight is still running, so a
+  // pick made mid-swap is held until the machine is free rather than lost.
+  const pendingRef = useRef<number | null>(null);
+  const pick = useCallback(
+    (i: number) => {
+      setGlance(false);
+      document.getElementById("stage")?.scrollIntoView({ block: "start" });
+      if (busy) pendingRef.current = i;
+      else void onChipClick(i);
+    },
+    [busy, onChipClick],
+  );
+  useEffect(() => {
+    if (busy || pendingRef.current === null) return;
+    const i = pendingRef.current;
+    pendingRef.current = null;
+    void onChipClick(i);
+  }, [busy, onChipClick]);
   return (
     <>
       <div className="stage" id="stage" hidden={!machine.ready}>
@@ -37,9 +66,10 @@ export function Machine({ tourSignal }: MachineProps) {
           <Monitor machine={machine} />
           <CarrierBoard machine={machine} />
         </div>
-        <Tray machine={machine} />
+        <Tray machine={machine} onGlance={openGlance} />
       </div>
       <FlightLayer />
+      {glance && <GlanceOverlay onClose={closeGlance} onPick={pick} />}
     </>
   );
 }

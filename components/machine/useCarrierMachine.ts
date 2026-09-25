@@ -101,7 +101,7 @@ function setHash(h: string) {
  * commits) with no tour mounted. Must stay in sync with tour-steps.ts's
  * TourWaitKind by hand for the same reason — there's no single shared
  * type to enforce it structurally. */
-export type TourSignalName = "chip" | "nav" | "loaded";
+export type TourSignalName = "chip" | "nav" | "loaded" | "glance";
 
 export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
   const crtRef = useRef<HTMLDivElement>(null);

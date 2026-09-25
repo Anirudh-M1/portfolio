@@ -45,16 +45,23 @@ svg.viz {
   background: transparent;
 }
 
-/* two-column split once the monitor is wide enough for a >=340px panel
-   plus a readable prose column; below that .doc stays a single stacked
-   column (panel under prose) via normal block flow — no rule needed. */
+/* two-column split once the monitor is wide enough that the prose column
+   keeps a comfortable measure beside the panel; below that .doc stays a
+   single stacked column (panel under prose, capped so it doesn't balloon
+   to the screen's full width). The prose column has priority: the panel
+   takes at most 40% of the screen and never more than 440px, so on a
+   smaller laptop the graph shrinks rather than squeezing the write-up to
+   a few words per line. */
 .crt .doc:has(> .docviz) {
   display: block;
 }
-@container monitor (min-width: 680px) {
+.crt .doc > .docviz {
+  max-width: 460px;
+}
+@container monitor (min-width: 820px) {
   .crt .doc:has(> .docviz) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
+    grid-template-columns: minmax(0, 1fr) min(40%, 440px);
     gap: 0 28px;
     align-items: start;
   }
