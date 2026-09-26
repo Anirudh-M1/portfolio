@@ -46,7 +46,10 @@ export function Machine({ tourSignal }: MachineProps) {
   const pick = useCallback(
     (i: number) => {
       setGlance(false);
-      document.getElementById("stage")?.scrollIntoView({ block: "start" });
+      // back to the page's resting position (the machine sits right under
+      // the nav bar) rather than scrolling .stage flush to the window top,
+      // which pushed the page a nav-bar's height past it
+      window.scrollTo({ top: 0 });
       if (busy) pendingRef.current = i;
       else void onChipClick(i);
     },

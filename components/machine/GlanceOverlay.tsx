@@ -25,7 +25,7 @@ export function GlanceOverlay({ onClose, onPick }: GlanceOverlayProps) {
     const prevFocus = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
+    closeRef.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -33,7 +33,7 @@ export function GlanceOverlay({ onClose, onPick }: GlanceOverlayProps) {
     return () => {
       removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
-      prevFocus?.focus();
+      prevFocus?.focus({ preventScroll: true });
     };
   }, [onClose]);
 
