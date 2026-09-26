@@ -225,8 +225,8 @@ export const DOCS: DriveDoc[] = [
     portrait: { src: "/portrait.jpg", alt: "Anirudh Moholkar" },
     lede:
       '<span class="edu-school">University of Illinois Urbana-Champaign</span>' +
-      '<span class="edu-line">M.C.S. Computer Science, Grainger College of Engineering <span class="edu-when">· May 2028 (Flexible Format)</span></span>' +
-      '<span class="edu-line">B.S. Computer Engineering, Grainger College of Engineering <span class="edu-when">· May 2027</span></span>' +
+      '<span class="edu-line"><span class="edu-fit">M.C.S. Computer Science, Grainger College of Engineering · May 2028</span> <span class="edu-when">(Flexible Format)</span></span>' +
+      '<span class="edu-line"><span class="edu-fit">B.S. Computer Engineering, Grainger College of Engineering · May 2027</span></span>' +
       '<span class="edu-line">Minor in Business, Gies College of Business</span>',
     paragraphs: [
       "Dean's List, James Scholar, Fiddler Innovation Award, <b>3.79</b> GPA.",

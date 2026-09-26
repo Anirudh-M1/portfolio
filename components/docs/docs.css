@@ -85,6 +85,9 @@
 }
 .docs .lede .edu-line {
   display: block;
+  /* same one-line guarantee on phones: 68ch of mono ≈ 41em must fit the
+   * viewport minus the page's side padding */
+  font-size: min(1em, calc((100vw - 88px) / 41));
   color: var(--dim);
 }
 .docs dl {

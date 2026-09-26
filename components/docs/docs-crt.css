@@ -79,11 +79,19 @@
 /* a date that doesn't fit drops to its own line whole, rather than
  * breaking "May / 2028" */
 .crt .doc .lede .edu-when,
-.docs .lede .edu-when {
+.docs .lede .edu-when,
+.crt .doc .lede .edu-fit,
+.docs .lede .edu-fit {
   white-space: nowrap;
 }
 .crt .doc .lede .edu-line {
   display: block;
+  /* The degree lines (up to 68 characters) always stay on one line. The
+   * text column beside the portrait is never narrower than ~54% of the
+   * screen (.screen is the "monitor" container), so capping the size at
+   * 1.28cqw keeps 68ch of this mono face inside it; wider screens hit the
+   * 1em cap and keep the normal size. */
+  font-size: min(1em, 1.28cqw);
   color: rgba(var(--phos-rgb), 0.78);
   text-shadow: 0 0 6px rgba(var(--phos-rgb), 0.14);
 }
