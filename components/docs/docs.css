@@ -79,6 +79,14 @@
 .docs .lede {
   color: var(--silk);
 }
+.docs .lede .edu-school {
+  display: block;
+  font-weight: 600;
+}
+.docs .lede .edu-line {
+  display: block;
+  color: var(--dim);
+}
 .docs dl {
   display: grid;
   grid-template-columns: max-content 1fr;

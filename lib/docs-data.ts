@@ -224,7 +224,10 @@ export const DOCS: DriveDoc[] = [
     sub: "Software engineer, systems and product",
     portrait: { src: "/portrait.jpg", alt: "Anirudh Moholkar" },
     lede:
-      "BS Computer Engineering, University of Illinois Urbana-Champaign, <b>May 2027</b><br />Minor in Business, Gies College of Business<br />MCS Computer Science, University of Illinois Urbana-Champaign, <b>May 2028</b> (in-person or online, alongside full-time work)",
+      '<span class="edu-school">University of Illinois Urbana-Champaign</span>' +
+      '<span class="edu-line">M.C.S. Computer Science, Grainger College of Engineering <span class="edu-when">· May 2028 (Flexible Format)</span></span>' +
+      '<span class="edu-line">B.S. Computer Engineering, Grainger College of Engineering <span class="edu-when">· May 2027</span></span>' +
+      '<span class="edu-line">Minor in Business, Gies College of Business</span>',
     paragraphs: [
       "Dean's List, James Scholar, Fiddler Innovation Award, <b>3.79</b> GPA.",
       "Two consecutive engineering internships at <b>Zebra Technologies</b>: Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Both shipped to production, with work commended directly by Zebra's CIO.",

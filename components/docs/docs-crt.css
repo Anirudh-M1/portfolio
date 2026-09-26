@@ -66,6 +66,27 @@
   color: var(--phos-hi);
   text-shadow: 0 0 8px rgba(var(--phos-rgb), 0.26);
 }
+/* README's education block: school as a bright heading line, then one
+ * dimmer line per degree */
+.crt .doc .lede:has(.edu-school) {
+  margin-top: 1.1em;
+}
+.crt .doc .lede .edu-school {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.2em;
+}
+/* a date that doesn't fit drops to its own line whole, rather than
+ * breaking "May / 2028" */
+.crt .doc .lede .edu-when,
+.docs .lede .edu-when {
+  white-space: nowrap;
+}
+.crt .doc .lede .edu-line {
+  display: block;
+  color: rgba(var(--phos-rgb), 0.78);
+  text-shadow: 0 0 6px rgba(var(--phos-rgb), 0.14);
+}
 .crt .doc {
   position: relative;
 }
