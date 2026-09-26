@@ -149,7 +149,7 @@ export const EDUCATION: EducationData = {
   ],
   gpaLine: "GPA 3.79 / 4.0",
   gpaTag: "Dean's List",
-  body: "James Scholar and recipient of the <b>Fiddler Innovation Award</b>.",
+  body: "James Scholar and a <b>Fiddler Innovation Fellow</b>.",
   bullets: [
     "<b>Systems:</b> Computer Systems &amp; Programming, Distributed Systems, Data Structures &amp; Algorithms",
     "<b>AI:</b> Artificial Intelligence, Applied Machine Learning, Reinforcement Learning",
@@ -229,7 +229,7 @@ export const DOCS: DriveDoc[] = [
       '<span class="edu-line"><span class="edu-fit">B.S. Computer Engineering, Grainger College of Engineering · May 2027</span></span>' +
       '<span class="edu-line">Minor in Business, Gies College of Business</span>',
     paragraphs: [
-      "Dean's List, James Scholar, Fiddler Innovation Award, <b>3.79</b> GPA.",
+      "Dean's List, James Scholar, Fiddler Innovation Fellow, <b>3.79</b> GPA.",
       "Two consecutive engineering internships at <b>Zebra Technologies</b>: Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Both shipped to production, with work commended directly by Zebra's CIO.",
       "I build systems that hold up when something fails. That's meant fault-tolerant storage across distributed nodes, stream processing under load, work down at the kernel level, and lately agentic AI over enterprise data. What I care about most is owning a problem end to end: finding it in the metrics, designing the fix, and being accountable for what it actually saved.",
       "There are thirteen drives in the tray below, each going deeper into my projects. Pick one and it'll load up.",

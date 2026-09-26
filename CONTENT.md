@@ -53,7 +53,7 @@ omitted — see `build-checklist.md`).
 
 H1: `Anirudh Moholkar`, sub `Distributed systems & backend infrastructure`.
 Lede: Computer Engineering at UIUC, expected May 2027, Dean's List / James
-Scholar / Fiddler Innovation Award, 3.79 GPA. Body: two Zebra Technologies
+Scholar / Fiddler Innovation Fellow, 3.79 GPA. Body: two Zebra Technologies
 internships (Cloud & Computing 2025, AI & Cloud Platform 2026), systems
 philosophy paragraph, "thirteen drives" call to action. Links: GitHub,
 LinkedIn, Email.
