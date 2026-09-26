@@ -73,6 +73,14 @@
  * 2.5em is the gutter. */
 .crt .doc:has(> .porcol) > p {
   max-width: calc(97.5% - clamp(150px, calc(100% - 66ch), 300px) - 2.5em);
+  /* no single word stranded on a paragraph's last line */
+  text-wrap: pretty;
+}
+/* keeps each item of a "·"-separated list together, so a list only
+ * breaks between items */
+.crt .doc .nb,
+.docs .nb {
+  white-space: nowrap;
 }
 /* README's education block: school as a bright heading line, then one
  * dimmer line per degree */

@@ -225,14 +225,15 @@ export const DOCS: DriveDoc[] = [
     portrait: { src: "/portrait.jpg", alt: "Anirudh Moholkar" },
     lede:
       '<span class="edu-school">University of Illinois Urbana-Champaign</span>' +
-      '<span class="edu-line"><span class="edu-fit">M.C.S. Computer Science, Grainger College of Engineering · May 2028</span> <span class="edu-when">(Flexible Format)</span></span>' +
-      '<span class="edu-line"><span class="edu-fit">B.S. Computer Engineering, Grainger College of Engineering · May 2027</span></span>' +
-      '<span class="edu-line">Minor in Business, Gies College of Business</span>',
+      '<span class="edu-line"><span class="edu-fit"><b>M.C.S. Computer Science</b>, Grainger College of Engineering · <b>May 2028</b></span> <span class="edu-when">(Flexible Format)</span></span>' +
+      '<span class="edu-line"><span class="edu-fit"><b>B.S. Computer Engineering</b>, Grainger College of Engineering · <b>May 2027</b></span></span>' +
+      '<span class="edu-line"><b>Minor in Business</b>, Gies College of Business</span>',
     paragraphs: [
-      "Dean's List, James Scholar, Fiddler Innovation Fellow, <b>3.79</b> GPA.",
-      "Two consecutive engineering internships at <b>Zebra Technologies</b>: Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Both shipped to production, with work commended directly by Zebra's CIO.",
-      "I build systems that hold up when something fails. That's meant fault-tolerant storage across distributed nodes, stream processing under load, work down at the kernel level, and lately agentic AI over enterprise data. What I care about most is owning a problem end to end: finding it in the metrics, designing the fix, and being accountable for what it actually saved.",
-      "There are thirteen drives in the tray below, each going deeper into my projects. Pick one and it'll load up.",
+      "<span class=\"nb\"><b>3.79 GPA</b> ·</span> <span class=\"nb\">Dean's List ·</span> <span class=\"nb\">James Scholar ·</span> <span class=\"nb\">Fiddler Innovation Fellow</span>",
+      "<b>Two internships at Zebra Technologies</b>, both shipped to production.<br />Cloud &amp; Computing in 2025, then AI &amp; Cloud Platform in 2026. Work commended directly by Zebra's CIO.",
+      "<b>I build systems that hold up when something fails.</b> Fault-tolerant storage across distributed nodes, stream processing under load, kernel-level work, and lately agentic AI over enterprise data.",
+      "What I care about most is <b>owning a problem end to end</b>: finding it in the metrics, designing the fix, and being accountable for what it saved.",
+      "<b>Thirteen drives</b> in the tray below, each going deeper into a project. Pick one and it'll load up.",
     ],
     links: [
       { label: "GitHub", href: "https://github.com/Anirudh-M1" },

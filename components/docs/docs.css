@@ -79,6 +79,9 @@
 .docs .lede {
   color: var(--silk);
 }
+.docs p {
+  text-wrap: pretty;
+}
 .docs .lede .edu-school {
   display: block;
   font-weight: 600;
