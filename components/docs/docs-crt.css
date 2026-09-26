@@ -66,6 +66,14 @@
   color: var(--phos-hi);
   text-shadow: 0 0 8px rgba(var(--phos-rgb), 0.26);
 }
+/* README only: the text runs right up to the portrait column instead of
+ * stopping at the usual 62ch, so the education lines and the paragraphs
+ * share one right edge and there's no dead gap before the photo. The
+ * portrait's own left edge is 97.5% minus its width (see .porcol); the
+ * 2.5em is the gutter. */
+.crt .doc:has(> .porcol) > p {
+  max-width: calc(97.5% - clamp(150px, calc(100% - 66ch), 300px) - 2.5em);
+}
 /* README's education block: school as a bright heading line, then one
  * dimmer line per degree */
 .crt .doc .lede:has(.edu-school) {
