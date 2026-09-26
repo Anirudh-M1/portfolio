@@ -587,6 +587,12 @@ export function useCarrierMachine(tourSignal?: (name: TourSignalName) => void) {
       const slot = slotRect();
       const card = document.querySelector<HTMLElement>(".card")!.getBoundingClientRect();
       const chipRect = chipEl.getBoundingClientRect();
+      // The flight's vanishing point has to follow the board too. fit()
+      // only sets it on resize, so after any scroll it pointed at where
+      // the board used to be, and the drive's rotateX projected from the
+      // wrong spot: it came in visibly stretched/steepened whenever a
+      // load started with the page scrolled even slightly.
+      if (fly) fly.style.perspectiveOrigin = `${card.left + card.width / 2}px ${card.top + card.height * 0.50526}px`;
       el.style.left = `${slot.left}px`;
       el.style.top = `${slot.top}px`;
       el.style.width = `${slot.width}px`;
