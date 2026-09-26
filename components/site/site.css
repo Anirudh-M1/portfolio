@@ -23,6 +23,11 @@ body.js .docs {
   body.js .docs {
     display: block;
   }
+  /* the guided tour never runs at this size (useOnboardingTour bails on
+   * this same query), so its replay button would do nothing */
+  .helpbtn {
+    display: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   html {
