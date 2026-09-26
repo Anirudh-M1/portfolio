@@ -54,10 +54,9 @@ export function GlanceOverlay({ onClose, onPick }: GlanceOverlayProps) {
           </button>
         </header>
         <p className="glance-lede">
-          Each card below is a project I completed: internship work at Zebra Technologies, systems coursework at
-          UIUC, a personal project, and organizations I&apos;ve led. Its graph shows what that project actually did or
-          measured. <b>Click any card</b> to load it onto the
-          machine and read the full write-up: the problem, how I approached it, and the results.
+          Each card below is a project I completed: internship work, systems coursework at UIUC, personal projects, or
+          a non-profit I&apos;ve led. The graph shows what that project actually did or measured. <b>Click any card</b>{" "}
+          to load it onto the machine and read the full write-up. The problem, how I approached it, and the results.
         </p>
         <div className="glance-grid">
           {DOCS.map((d, i) =>

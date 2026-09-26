@@ -104,6 +104,9 @@ html.tour-on .glance {
 
 .glance-lede {
   margin: 0 0 22px;
+  /* justified so each full line reaches the grid's right edge instead of
+   * leaving a ragged gap there */
+  text-align: justify;
   font-size: 13px;
   line-height: 1.7;
   color: var(--dim);
